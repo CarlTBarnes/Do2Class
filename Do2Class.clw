@@ -78,7 +78,9 @@ Do2Class        PROCEDURE()
     OF ?CopySaveFnBtn ; SETCLIPBOARD(TxaSaveFile)
     OF ?CompareSaveFnBtn ; DDD.CompareSaveFn()
     OF ?ExploreSaveFnBtn ; IF TxaSaveFile THEN RUN('Explorer.exe /select,"' & CLIP(TxaSaveFile) &'"').
-    OF ?PickTXAbtn    ; IF FILEDIALOG('Select a TXA file',TxaLoadFile,'TXA Files (*.TXA)|*.TXA|All Files|*.*' ,File:LongName + FILE:KeepDir) 
+    OF ?PickTXAbtn    ; IF FILEDIALOG('Select a TXA file',TxaLoadFile, |
+                                      'TXA & APV Files|*.TXA;*.APV|TXA Files|*.TXA|APV Files|*.APV|All Files|*.*' , |
+                                      File:LongName + FILE:KeepDir) 
                            SELECT(?TxaLoadFile) ; DISPLAY ; POST(EVENT:Accepted,?LoadTxaBtn) 
                         END
     OF ?PasteTXAbtn   ; TxaLoadFile=CLIPBOARD() ; DISPLAY ; IF EXISTS(TxaLoadFile) THEN POST(EVENT:Accepted,?LoadTxaBtn).
