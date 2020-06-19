@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+# Clarion 2.1.0.2447
+Project("{12B76EC0-1D7B-4FA7-A7D0-C524288B48A1}") = "Do2Class", "Do2Class.cwproj", "{FF9383F6-0167-4198-A3C6-D1FDF6969C80}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Related files", "Related files", "{AEE9C03E-D292-4E0A-854B-CEA4E1267404}"
+	ProjectSection(SolutionItems) = postProject
+		CBTxa2Q.CLW = CBTxa2Q.CLW
+		CBTxa2Q.INC = CBTxa2Q.INC
+		Do2Class.clw = Do2Class.clw
+		Do2Class_DATA.clw = Do2Class_DATA.clw
+		Do2Class_Window.clw = Do2Class_Window.clw
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FF9383F6-0167-4198-A3C6-D1FDF6969C80}.Debug|Win32.Build.0 = Debug|Win32
+		{FF9383F6-0167-4198-A3C6-D1FDF6969C80}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FF9383F6-0167-4198-A3C6-D1FDF6969C80}.Release|Win32.Build.0 = Release|Win32
+		{FF9383F6-0167-4198-A3C6-D1FDF6969C80}.Release|Win32.ActiveCfg = Release|Win32
+	EndGlobalSection
+EndGlobal
