@@ -106,13 +106,13 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                 PANEL,AT(2,53,,2),FULL,USE(?PanelH),BEVEL(0,0,0600H)
                 SHEET,AT(5,54),FULL,USE(?Sheet_TXA),NOSHEET,BELOW
                     TAB('  TXA File  '),USE(?Tab_TxaFile)
-                        LIST,AT(1,71,,317),FULL,USE(?LIST:TxaQ),HVSCROLL,FONT('CONSOLAS',10),VCR, |
+                        LIST,AT(1,71),FULL,USE(?LIST:TxaQ),HVSCROLL,FONT('CONSOLAS',10),VCR, |
                                 FROM(TxaQ),FORMAT('30R(2)|FM~Line#~L(2)@n_5@20R(2)|M~Len~L(2)@n7@30R' & |
                                 '(2)|M~BegPos~L(2)@n7@#5#30R(2)|M~EndPos~L(2)@n7@30L(2)Y~TXA Line Te' & |
                                 'xt - Right click for options~@s255@#3#'),ALRT(EnterKey)
                     END
                     TAB('  TXA [EMBED]  '),USE(?Tab_Txa_EMBED)
-                        LIST,AT(1,71,,317),FULL,USE(?LIST:EmbedQ),VSCROLL,FONT('CONSOLAS',10),FROM(EmbedQ), |
+                        LIST,AT(1,71),FULL,USE(?LIST:EmbedQ),VSCROLL,FONT('CONSOLAS',10),FROM(EmbedQ), |
                                 FORMAT('30R(2)|M~Line#~C(0)@n7@19C|M~Type~@s1@Q''D=Data R=Routine L=' & |
                                 'Local Procedure''125L(2)|M~[Embed]<13,10>Name~@s255@[30R(2)|M~BegPo' & |
                                 's~C(0)@n7@30R(2)|M~EndPos~C(0)@n7@30R(2)|M~Code#~C(0)@n75@]|~[SOURC' & |
@@ -121,14 +121,14 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                     END
                     TAB('  Embed [SOURCE] Lines '),USE(?Tab_Txa_SOURCE)
                         STRING('SourceQ Recs'),AT(350,58),USE(?SourceQRecs)
-                        LIST,AT(1,71,,317),FULL,USE(?LIST:SourceQ),HVSCROLL,FONT('CONSOLAS',10),VCR, |
+                        LIST,AT(1,71),FULL,USE(?LIST:SourceQ),HVSCROLL,FONT('CONSOLAS',10),VCR, |
                                 FROM(SourceQ),FORMAT('30R(2)|FM~Line#~C(0)@n7@24R(2)|M~Len~C(0)@n7@3' & |
                                 '0R(2)|M~BegPos~C(0)@n7@#5#30R(2)|M~EndPos~C(0)@n7@21C|M~Type~@s1@#1' & |
                                 '0#30L(2)~Source lines before change - Double click jumps to TXA Lin' & |
                                 'e, Right click more ...~L(2)@s255@#3#'),ALRT(EnterKey)
                     END
                     TAB(' [Section] Only '),USE(?Tab_SxaQ)
-                        LIST,AT(1,71,,317),FULL,USE(?LIST:SxaQ),HVSCROLL,FONT('CONSOLAS',10),VCR, |
+                        LIST,AT(1,71),FULL,USE(?LIST:SxaQ),HVSCROLL,FONT('CONSOLAS',10),VCR, |
                                 FROM(SxaQ),FORMAT('30R(2)|FM~Line#~L(2)@n_5@72L(2)|FM~[Secton]~@s255' & |
                                 '@#3#30L(2)~Next Line~@s255@#5#'),ALRT(EnterKey)
                     END
@@ -176,11 +176,11 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                 END
                 BUTTON('ReRun'),AT(543,20,30,11),USE(?RunAgainBtn2),SKIP,TIP('Run another Instance')
                 PROMPT('CLASS Code:'),AT(7,35),USE(?FixdCode:Prompt)
-                TEXT,AT(7,46,,342),FULL,USE(FixdCode),HVSCROLL,FONT('Consolas',10)
+                TEXT,AT(7,46),FULL,USE(FixdCode),HVSCROLL,FONT('Consolas',10)
             END
             TAB(' C&hanges'),USE(?TabChangeQ),TIP('Changed lines Over-Under view')
                 BUTTON('Copy'),AT(7,18,,13),USE(?CopyChangesBtn),SKIP,TIP('Copy the Change list below')
-                LIST,AT(7,33,,355),FULL,USE(?LIST:ChangeQ),VSCROLL,FONT('Consolas',10),FROM(ChangeQ), |
+                LIST,AT(7,33),FULL,USE(?LIST:ChangeQ),VSCROLL,FONT('Consolas',10),FROM(ChangeQ), |
                         FORMAT('[66R(2)|FM~Line~C(0)@n6@/](28)|F[20L(2)|FM~Before Line            Do' & |
                         'uble Click on line to jump to SourceQ Tab~@s255@/2L(2)|_FM~After Line      ' & |
                         '   Delete any undesired changes by selecting the line and pressing DELETE~L' & |
@@ -188,14 +188,14 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
             END
             TAB(' Chg SbS'),USE(?TabChgQSbS),TIP('Changed lines Side-by-Side view')
                 BUTTON('Copy'),AT(7,18,,13),USE(?CopyChgSbSBtn),SKIP,TIP('Copy the Change list below')
-                LIST,AT(7,33,,355),FULL,USE(?LIST:ChangeQ:SbS),VSCROLL,FONT('Consolas',10),FROM(ChangeQ), |
+                LIST,AT(7,33),FULL,USE(?LIST:ChangeQ:SbS),VSCROLL,FONT('Consolas',10),FROM(ChangeQ), |
                         FORMAT('28R(2)|FM~Line~C(0)@n6@250L(2)|FM~Before Line    Double Click on lin' & |
                         'e to jump to SourceQ Tab~@s255@400L(2)F~After Line    Delete any undesired ' & |
                         'changes by selecting the line and pressing DELETE~@s255@'),ALRT(DeleteKey), |
                          ALRT(EnterKey)
             END
             TAB(' Cl&ass Q'),USE(?TabClassQ),TIP('List of Classes (Routines) found in code')
-                LIST,AT(7,23,,365),FULL,USE(?LIST:ClassQ),VSCROLL,FONT('Consolas',10),FROM(ClassQ), |
+                LIST,AT(7,23),FULL,USE(?LIST:ClassQ),VSCROLL,FONT('Consolas',10),FROM(ClassQ), |
                         FORMAT('100L(2)|FM~Name~23R(2)|FM~Line~L(2)@n5b@204L(2)|FM~Code~@s255@'), |
                         ALRT(EnterKey)
             END
@@ -215,13 +215,13 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                 BUTTON('Implicit#$"'),AT(453,19,37,10),USE(?Sample:Impli),TIP('Find next Implicit us' & |
                         'age<13,10>They work differently.')
                 BUTTON('OMIT'),AT(493,19,30,10),USE(?Sample:OMIT)
-                LIST,AT(7,33,,355),FULL,USE(?LIST:CodeQ),VSCROLL,FONT('Consolas',10),FROM(CodeQ), |
+                LIST,AT(7,33),FULL,USE(?LIST:CodeQ),VSCROLL,FONT('Consolas',10),FROM(CodeQ), |
                         FORMAT('23R(2)|FM~Line~L(2)@n5b@23R(2)|FM~Type~L(2)@n-3b@/23R(2)|FM~Rtn Pos ' & |
                         'of Label ~L(2)@n4b@/250L(2)|MY~Code Line Original~S(200)@s255@204L(2)|M~CoL' & |
                         'ine - Code Only no Literal/Comment for Parsing~S(200)@s255@'),ALRT(EnterKey)
             END
             TAB(' Code O-U'),USE(?TabCodeOU),TIP('Code Over-Under View')
-                LIST,AT(7,23,,365),FULL,USE(?LIST:CodeOU),VSCROLL,FONT('Consolas',10),VCR,FROM(CodeQ), |
+                LIST,AT(7,23),FULL,USE(?LIST:CodeOU),VSCROLL,FONT('Consolas',10),VCR,FROM(CodeQ), |
                         FORMAT('[66R(1)|FM~Line~@n5@/20L(1)|_FM~Type~@n-3b@](33)|F[20L(2)|FMY~Code L' & |
                         'ine Original~@s255@/#4#20L(2)|_FM~CoLine - Code only without String Literal' & |
                         's or Comments for Searching~L(18)@s255@]|F'),ALRT(EnterKey)
@@ -245,7 +245,7 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                         AT(49,60),USE(Cfg:TagImplicitLines,, ?Cfg:TagImplicitLines:ImpTab),SKIP, |
                         TIP('Tag Implicit Lines !#$" on write TXA<13,10>to make it easy to find them' & |
                         ' in the Embeditor by search for !#$.')
-                LIST,AT(7,73,,315),FULL,USE(?LIST:ImpliQ),VSCROLL,FONT('Consolas',10),FROM(ImpliQ), |
+                LIST,AT(7,73),FULL,USE(?LIST:ImpliQ),VSCROLL,FONT('Consolas',10),FROM(ImpliQ), |
                         FORMAT('23R(2)|FM~Line~L(2)@n5b@23R(2)|FM~Type~L(2)@n-3b@/23R(2)|FM~Rtn Pos ' & |
                         'of Label ~L(2)@n4b@/250L(2)|MY~Code Line Modified ~S(200)@s255@204L(2)~Code' & |
                         ' Line Original ~S(200)@s255@'),ALRT(EnterKey)
@@ -265,7 +265,7 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                 STRING('Code changes MUST be made ... An ABC limitation is a Routine is the only way' & |
                         ' to get Omitted() for Procedure so change back to a Routine.  (read tooltip)'), |
                         AT(27,60),USE(?ProbOmittedFix)
-                LIST,AT(7,83,,305),FULL,USE(?LIST:ProblmQ),VSCROLL,FONT('Consolas',10),FROM(ProblmQ), |
+                LIST,AT(7,83),FULL,USE(?LIST:ProblmQ),VSCROLL,FONT('Consolas',10),FROM(ProblmQ), |
                         FORMAT('23R(2)|FM~Line~L(2)@n5b@23R(2)|FM~Type~L(2)@n-3b@/23R(2)|FM~Rtn Pos ' & |
                         'of Label ~L(2)@n4b@/250L(2)|MY~Code Line Modified ~S(200)@s255@204L(2)~Code' & |
                         ' Line Original ~S(200)@s255@'),ALRT(EnterKey)
@@ -274,7 +274,7 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                 STRING('This program processes OMIT() / COMPILE() code. Best to double check this wi' & |
                         'll not cause problems. '),AT(49,19),USE(?StringOmitQ)
                 BUTTON('Copy'),AT(7,18,,12),USE(?CopyOmitBtn),SKIP,TIP('Copy the Omit list below')
-                LIST,AT(7,33,,355),FULL,USE(?LIST:OmitQ),VSCROLL,FONT('Consolas',10),FROM(OmitQ), |
+                LIST,AT(7,33),FULL,USE(?LIST:OmitQ),VSCROLL,FONT('Consolas',10),FROM(OmitQ), |
                         FORMAT('23R(2)|FM~Line~L(2)@n5b@23R(2)|FM~Type~L(2)@n-3b@/23R(2)|FM~Rtn Pos ' & |
                         'of Label ~L(2)@n4b@/250L(2)|MY~Code Line Modified ~S(200)@s255@204L(2)~Code' & |
                         ' Line Original ~S(200)@s255@'),ALRT(EnterKey)
