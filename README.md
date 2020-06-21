@@ -77,7 +77,7 @@ DOO.Defaults PROCEDURE()  ! Setup Default Values
 |       | Sort | Check to Sort Methods by Name in CLASS declaration, else in Line Order. |
 |       | Tag Implicit !#$" | Tag Implicit Lines !#$" in the save TXA to make it easy to find them and fix. |
 
-## Options
+## Features
 
 Double click on any LIST line tries to take you to a logical place, e.g. double click on a line on the Problem, Implicit or Omit tab takes you to the view the complete source. Right click on any LIST shows a POPUP of all the other lists that lets you jump to that line in the selected list e.g. on a Problem Right click and on the Popup select TXA to see that line in the TXA file.
 

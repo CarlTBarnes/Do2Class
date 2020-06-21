@@ -43,7 +43,8 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                 CHECK('. Step'),AT(54,37),USE(?Step:X)
                 CHECK(' Backup APP Folder. TXA Verify by Export + Import + Compare CLWs'),AT(54,37), |
                         USE(?Step:BackupAPP)
-                CHECK(' Selective Export to TXA One Procedure to APP_Procedure.TXA.  Optional: Copy Procedure inside APP to have original to view.'),AT(54,60),USE(?Step:Txa1Procedure) |
+                CHECK(' Selective Export to TXA One Procedure to APP_Procedure.TXA.  Optional: Copy ' & |
+                        'Procedure inside APP to have original to view.'),AT(54,60),USE(?Step:Txa1Procedure) |
                         
                 CHECK(' In Do2Class TXA Name pick your "APP_Procedure.TXA" and click Load'),AT(54,81), |
                         USE(?Step:LoadTxaHere)
@@ -55,8 +56,8 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                 CHECK(' Review PROBLEMS tab. This code refactoring can be handled after Import Do2Cl' & |
                         'ass TXA. Or refactor and export and import again.'),AT(54,121),USE(?Step:Problems)
                 BUTTON('Jump'),AT(17,141,29,10),USE(?Jump:Implicit)
-                CHECK(' Review IMPLICIT #$" tab. CANNOT be used to pass data. They are Class Me' & |
-                        'thod Scope versus in Routines are Procedure scope.  Best to remove implicits. '), |
+                CHECK(' Review IMPLICIT #$" tab. CANNOT be used to pass data. They are Class Method ' & |
+                        'Scope versus in Routines are Procedure scope.  Best to remove implicits. '), |
                         AT(54,141),USE(?Step:Implicit)
                 BUTTON('Jump'),AT(17,161,29,10),USE(?Jump:SaveTxa)
                 CHECK(' Save TXA on CLASS Code tab with modifications to change Routine to Class nam' & |
@@ -67,8 +68,8 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                 CHECK(' Import Do2Class TXA in APP and Build. Review Errors and refactor code as nee' & |
                         'ded. ... Don''t like the results? Import the original TXA to undo changes.'), |
                         AT(54,201),USE(?Step:AppImportTxaDo2Class)
-                CHECK(' After Import to APP Review PROBLEMS, OMITS, IMPLICIT tabs again and check in APP code. '),AT(54,226), |
-                        USE(?Step:Problems2)
+                CHECK(' After Import to APP Review PROBLEMS, OMITS, IMPLICIT tabs again and check in' & |
+                        ' APP code. '),AT(54,226),USE(?Step:Problems2)
                 CHECK(' The XRef tab may help understand the code. '),AT(54,241),USE(?Step:Problems2:2)
             END
             TAB(' &TXA '),USE(?TabTxaLoad)
@@ -98,7 +99,9 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                         's. I do NOT think this will work.<13,10>Process %NewMethodCodeSection Embed' & |
                         's and Data')
                 CHECK('%LocalProcedures Embeds'),AT(311,42),USE(Cfg:Do2LocalProc),TIP('Local Procedu' & |
-                        'res can contain Local ROUTINEs.<13,10>Those should NOT be processed by Do2Class.')
+                        'res can contain Local ROUTINEs which should NOT be processed by Do2Class.' & |
+                        '<13,10,13,10>If this Embed was incorrectly used for ROUTINEs then check thi' & |
+                        's box to process it.')
                 PROMPT('Must be SINGLE Procedure TXA.'),AT(441,35,49,15),USE(?TxaWarn1Proc), |
                         FONT(,8,COLOR:Red)
                 CHECK('Parse Only'),AT(503,34,47),USE(ParseOnly),TIP('Do not convert so can test parsing')
@@ -106,31 +109,32 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                 PANEL,AT(2,53,,2),FULL,USE(?PanelH),BEVEL(0,0,0600H)
                 SHEET,AT(5,54),FULL,USE(?Sheet_TXA),NOSHEET,BELOW
                     TAB('  TXA File  '),USE(?Tab_TxaFile)
-                        LIST,AT(1,71),FULL,USE(?LIST:TxaQ),HVSCROLL,FONT('CONSOLAS',10),VCR, |
-                                FROM(TxaQ),FORMAT('30R(2)|FM~Line#~L(2)@n_5@20R(2)|M~Len~L(2)@n7@30R' & |
-                                '(2)|M~BegPos~L(2)@n7@#5#30R(2)|M~EndPos~L(2)@n7@30L(2)Y~TXA Line Te' & |
-                                'xt - Right click for options~@s255@#3#'),ALRT(EnterKey)
+                        LIST,AT(1,71),FULL,USE(?LIST:TxaQ),HVSCROLL,FONT('CONSOLAS',10),VCR,FROM(TxaQ), |
+                                FORMAT('30R(2)|FM~Line#~L(2)@n_5@20R(2)|M~Len~L(2)@n7@30R(2)|M~BegPo' & |
+                                's~L(2)@n7@#5#30R(2)|M~EndPos~L(2)@n7@30L(2)Y~TXA Line Text - Right ' & |
+                                'click for options~@s255@#3#'),ALRT(EnterKey)
                     END
                     TAB('  TXA [EMBED]  '),USE(?Tab_Txa_EMBED)
                         LIST,AT(1,71),FULL,USE(?LIST:EmbedQ),VSCROLL,FONT('CONSOLAS',10),FROM(EmbedQ), |
                                 FORMAT('30R(2)|M~Line#~C(0)@n7@19C|M~Type~@s1@Q''D=Data R=Routine L=' & |
-                                'Local Procedure''125L(2)|M~[Embed]<13,10>Name~@s255@[30R(2)|M~BegPo' & |
-                                's~C(0)@n7@30R(2)|M~EndPos~C(0)@n7@30R(2)|M~Code#~C(0)@n75@]|~[SOURC' & |
-                                'E]~31L(2)~Code<13,10>Line 1     Double Click to jump to TXA line~@s255@'), |
-                                ALRT(EnterKey)
+                                'Local Procedure <13,10>M=Method Code P=Method Data''125L(2)|M~[Embe' & |
+                                'd]<13,10>Name~@s255@[30R(2)|M~BegPos~C(0)@n7@30R(2)|M~EndPos~C(0)@n' & |
+                                '7@30R(2)|M~Code#~C(0)@n75@]|~[SOURCE]~31L(2)~Code<13,10>Line 1     ' & |
+                                'Double Click to jump to TXA line~@s255@'),ALRT(EnterKey)
                     END
                     TAB('  Embed [SOURCE] Lines '),USE(?Tab_Txa_SOURCE)
                         STRING('SourceQ Recs'),AT(350,58),USE(?SourceQRecs)
                         LIST,AT(1,71),FULL,USE(?LIST:SourceQ),HVSCROLL,FONT('CONSOLAS',10),VCR, |
                                 FROM(SourceQ),FORMAT('30R(2)|FM~Line#~C(0)@n7@24R(2)|M~Len~C(0)@n7@3' & |
-                                '0R(2)|M~BegPos~C(0)@n7@#5#30R(2)|M~EndPos~C(0)@n7@21C|M~Type~@s1@#1' & |
-                                '0#30L(2)~Source lines before change - Double click jumps to TXA Lin' & |
-                                'e, Right click more ...~L(2)@s255@#3#'),ALRT(EnterKey)
+                                '0R(2)|M~BegPos~C(0)@n7@#5#30R(2)|M~EndPos~C(0)@n7@21C|M~Type~@s1@Q''' & |
+                                'D=Data R=Routine L=Local Procedure <13,10>M=Method Code P=Method Da' & |
+                                'ta''#10#30L(2)~Source lines before change - Double click jumps to T' & |
+                                'XA Line, Right click more ...~@s255@#3#'),ALRT(EnterKey)
                     END
                     TAB(' [Section] Only '),USE(?Tab_SxaQ)
-                        LIST,AT(1,71),FULL,USE(?LIST:SxaQ),HVSCROLL,FONT('CONSOLAS',10),VCR, |
-                                FROM(SxaQ),FORMAT('30R(2)|FM~Line#~L(2)@n_5@72L(2)|FM~[Secton]~@s255' & |
-                                '@#3#30L(2)~Next Line~@s255@#5#'),ALRT(EnterKey)
+                        LIST,AT(1,71),FULL,USE(?LIST:SxaQ),HVSCROLL,FONT('CONSOLAS',10),VCR,FROM(SxaQ), |
+                                FORMAT('30R(2)|FM~Line#~L(2)@n_5@72L(2)|FM~[Secton]~@s255@#3#30L(2)~' & |
+                                'Next Line~@s255@#5#'),ALRT(EnterKey)
                     END
                 END
             END
@@ -149,7 +153,7 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                 PROMPT('Class:'),AT(389,20),USE(?DooClassName:Pmt2)
                 ENTRY(@s30),AT(411,20,63,10),USE(DooClassName,, ?DooClassName:2),SKIP,TIP('Your Desi' & |
                         'red Class Name, I like DOO')
-                TEXT,AT(7,36,,352),FULL,USE(OrigCode),HVSCROLL,FONT('Consolas',10)
+                TEXT,AT(7,36),FULL,USE(OrigCode),HVSCROLL,FONT('Consolas',10)
             END
             TAB(' &CLASS Code (Save TXA)'),USE(?TabClassCode),TIP('Final Result of this program')
                 BUTTON('Copy Class'),AT(7,19,41,13),USE(?CopyBtn),SKIP,TIP('Copy CLASS Code to Clipboard')
@@ -157,19 +161,21 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                 GROUP,AT(90,18,453,25),USE(?SaveTxaGroup),DISABLE
                     BUTTON('&Save TXA with Classes'),AT(92,19,,13),USE(?TxaSaveBtn),TIP('Save TXA wi' & |
                             'th Class changes and below TXT file<13,10>Also places file name on Clipboard')
-                    CHECK('Omit ! DATA'),AT(92,33),USE(Cfg:OmitDATAline),TIP('Routine DATA statemene' & |
-                            'ts that are commented out')
+                    CHECK('Omit ! DATA'),AT(92,33),USE(Cfg:OmitDATAline),TIP('Uncheck to retain Rout' & |
+                            'ine DATA lines  as a !comment.<13,10>Allow searching for Routines that ' & |
+                            'had DATA.')
                     ENTRY(@s255),AT(185,20,314,11),USE(TxaSaveFile),SKIP,COLOR(COLOR:BTNFACE),READONLY
                     CHECK('Write CLASS to %Data'),AT(185,33),USE(Cfg:WriteClass2Data),TIP('Write CLA' & |
                             'SS declaration to first Data embed')
-                    CHECK('Sorted'),AT(267,33),USE(Cfg:WriteClassSorted),TIP('Sort claases by Name, ' & |
+                    CHECK('Sorted'),AT(267,33),USE(Cfg:WriteClassSorted),TIP('Sort Methods by Name, ' & |
                             'uncheck for by Line Order')
-                    CHECK('Tag Implicit !#$" '),AT(303,33),USE(Cfg:TagImplicitLines),TIP('Tag Implic' & |
-                            'it Lines !#$" on write TXA<13,10>to make it easy to find them.')
+                    CHECK('Tag Implicit !#$" '),AT(303,33),USE(Cfg:TagImplicitLines),TIP('Tag Implicit Lines !#$" in the save TXA to make it easy to find them and fix.')
                     CHECK('Write No Changes'),AT(375,33),USE(WriteNoChanges),TIP('Test the TXA Write' & |
-                            ' code works correcty.<13><10>Without changes a compare should show the files' & |
-                            ' are identical.')
+                            ' code works correcty.<13><10>Without changes a compare should show the ' & |
+                            'files are identical.')
                     BUTTON('Copy'),AT(503,20,26,11),USE(?CopySaveFnBtn),SKIP,TIP('Copy Save Filename')
+                    BUTTON('Edit'),AT(475,33,24,11),USE(?EditSaveFnBtn),SKIP,TIP('Open Save TXA in a' & |
+                            'n Editor, maybe to rename the Procedure')
                     BUTTON('Compare'),AT(503,33,35,11),USE(?CompareSaveFnBtn),SKIP,TIP('Compare Save' & |
                             'd TXA to Original with WinMerge')
                     BUTTON('Explore'),AT(543,33,30,11),USE(?ExploreSaveFnBtn),SKIP,TIP('Open Explorer')
