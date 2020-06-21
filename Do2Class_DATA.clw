@@ -55,8 +55,8 @@ Font10ptChange          PROCEDURE()
 XRefCopy                PROCEDURE() !Copy XRef Qs to Clipboard
 LastProcedureInClass    PROCEDURE()  !I just add to the end before this 
 LogFileAppend           PROCEDURE()  !Add to the LogFile
-CompareSaveFn           PROCEDURE()
-
+EditSaveFn              PROCEDURE()  !Open Save TXA in an Editor (Notepad)
+CompareSaveFn           PROCEDURE()  !Compare Before and After TXAs using WinMerge
         END
         
 !Region Queues 

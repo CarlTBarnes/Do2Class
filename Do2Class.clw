@@ -76,6 +76,7 @@ Do2Class        PROCEDURE()
     OF ?ProcessTxaBtn ; DDD.ProcessCodeQ2DoClass() ; DISPLAY ; SELECT(?TabCodeQ)
     OF ?TxaSaveBtn    ; DDD.WriteTXAFile() ; SETCLIPBOARD(TxaSaveFile)
     OF ?CopySaveFnBtn ; SETCLIPBOARD(TxaSaveFile)
+    OF ?EditSaveFnBtn    ; DDD.EditSaveFn()
     OF ?CompareSaveFnBtn ; DDD.CompareSaveFn()
     OF ?ExploreSaveFnBtn ; IF TxaSaveFile THEN RUN('Explorer.exe /select,"' & CLIP(TxaSaveFile) &'"').
     OF ?PickTXAbtn    ; IF FILEDIALOG('Select a TXA file',TxaLoadFile, |
@@ -307,7 +308,12 @@ DDD.LoadTxaFile  PROCEDURE()
   SELECT(?TabClassCode)
   DDD.TxaAddChangesQEmbeds() 
   DDD.TabCountQ()
-  DDD.LogFileAppend()
+  DDD.LogFileAppend() 
+  IF RECORDS(ClassQ) < 3 THEN
+     IF Message('There were ZERO Routines found.||Maybe they are not in the %ProcedureRoutines nor %ProcRoutines?' & |
+             '||If Routine code is in the %LocalProcedures embed, you can check|the box on the TXA tab to convert those embeds.' , |
+             'No Routines Found',ICON:Asterisk,'Close|Check %LP Embeds') = 2 THEN SELECT(?Cfg:Do2LocalProc).
+  END
 !TODO Finish method  
   RETURN 1
 !-------------------------
@@ -1507,6 +1513,21 @@ BS LONG
     ADD(LogFile,LenFastClip(Log:Line))
     CLOSE(LogFile)
 
+!------------
+DDD.EditSaveFn PROCEDURE()  
+EditorEXE STRING(260)
+Switches  PSTRING(64)
+RunLine CSTRING(1000)  
+    CODE
+    IF ~EXISTS(TxaSaveFile) THEN 
+        Message('Please save the TXA file first') ; SELECT(?TxaSaveBtn) ; RETURN 
+    END 
+    EditorEXE=GETINI('Editor','EXE','Notepad.EXE','.\Editor.INI')
+    Switches =CLIP(' '&GETINI('Editor','Switches','','.\Editor.INI'))
+    RunLine='"' & CLIP(EditorEXE) &'"' & Switches & ' "'&  CLIP(TxaSaveFile) &'"'
+    RUN(RunLine)
+    IF ERRORCODE() THEN Message('Run error ' & ErrorCode()&' '& ERROR() &'||Run('& RunLine ).
+    RETURN
 !------------
 DDD.CompareSaveFn PROCEDURE()  
 WinMergeEXE STRING(260)  ! F:\Tools\WinMerge_v216.4\WinMergeU.exe  Maybe make EXE and swicthes a INI setting or config 
