@@ -26,6 +26,10 @@ The process for converting in short is Export one Procedure to TXA, Load TXA in 
 
 This method will also work with module TXA files as long as they only contain one procedure. It will work with APV files used for version control so it will work with @Rick-UpperPark [Upper Park](http://www.upperparksolutions.com/) integration tool.
 
+![TXA Load](images/readme1.png)
+
+![TXA Save](images/readme2.png)
+
 ## Code Changes Made
 
 1. `RouName ROUTINE` changes to `DOO.RouName PROCEDURE()`
@@ -60,6 +64,8 @@ DOO.Defaults PROCEDURE()  ! Setup Default Values
   RETURN
 ```
 
+![Chnages](images/readme3.png)
+
 ## Options
 
 | Tab | Option | Description |
@@ -80,6 +86,8 @@ DOO.Defaults PROCEDURE()  ! Setup Default Values
 ## Features
 
 Double click on any LIST line tries to take you to a logical place, e.g. double click on a line on the Problem, Implicit or Omit tab takes you to the view the complete source. Right click on any LIST shows a POPUP of all the other lists that lets you jump to that line in the selected list e.g. on a Problem Right click and on the Popup select TXA to see that line in the TXA file.
+
+XRef tab shows Callee-Caller and Caller-Callee Cross Reference. See screen capture at the end.
 
 ## Conversion Issues
 
@@ -184,3 +192,9 @@ MyClass.HelloWorld PROCEDURE()
 ```
 
 Do2Class has an Implicit tab to show you all use of implicit variables. You can double click or right click on the line to see the complete code. On the Save TXA tab is a Check option to "Tag Implicit Code with !#$"" that will add that comment token `!#$"` to all lines that use implicits. This will make it easy to search for them and refactor the code.
+
+## Cross Reference ##
+
+As the conversion is done an XRef is built showing Callee-Caller and Caller-Callee. This can help understand the code and refactor it. Even if you do not convert you may find the Xref helpful. References to \*PROCEDURE\* are for the main procedure calling the routines. You can double click on these lines and just to the source code, or right click on them and a popup menu offers to jump to that line in any of the
+
+![XRef Table](images/readme_xref.png)
