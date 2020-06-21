@@ -56,6 +56,7 @@ LinesQ      &CbTxaLineQueueType
 LineCnt     LONG
 SourceQ     &CbTxaSourceQueueType
 ProcName    STRING(128)
+FromTemplate  STRING(128)    !FROM Clairon Report or FROM CPCSRpts UnivReport
 ProcCount   USHORT
 !Methods
 !-------

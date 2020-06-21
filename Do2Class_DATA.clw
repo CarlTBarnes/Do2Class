@@ -2,8 +2,9 @@
 DooClassName STRING('DOO {26}')   !<--- Set your desired class name
 p2ClassName PSTRING(32) !('DOO')   !<--- Set your desired class name
 p2ClassDot  PSTRING(33) !('DOO.')  !     TODO inout on window and save to INI
-!EMBED_DATASECTION  EQUATE('EMBED %DATASECTION')            !Not in Report nor Process
-EMBED_DATASECTION   EQUATE('EMBED %DECLARATIONSECTION')     !Not in Source so Orphaned is embed but fixable
+
+EMBED_DATA_DataSection  EQUATE('EMBED %DATASECTION')            !Default Data Embed
+EMBED_DATA_Declaration  EQUATE('EMBED %DECLARATIONSECTION')     !Report or Process or UnivReport or UnivProcess
  
 TxaCls  CBTxa2QClass
 TxaLoadFile STRING(260)

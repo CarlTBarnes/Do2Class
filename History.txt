@@ -1,0 +1,19 @@
+2017        First version
+
+06/18/20    First Public Commit
+
+06/18/20    File Dialog add APV files for version controled APPs and Rick Martin's tool
+
+06/21/20    ReadMe.md completed with instructions
+
+06/21/20    Save TXA Tab add Edit button to open saved TXA. 
+            DDD.EditSaveFn PROCEDURE() to open TXA in Editor. EXE name and swicthes from Editor.INI file
+            Warning if file had no Routines, and suggest they may be in %LocalProcedures ... incorrectly
+            Cosmetic changes
+            
+06/21/20    Only use "EMBED %DECLARATIONSECTION' in REPORT or PROCESS else use EMBED %DATASECTION
+            Add new [SOURCE] embed with DOO CLASS instead of prepending to first Data Embed
+            CbTxaClass add new Property .FromTemplate to know if REPORT or PROCESS
+
+            
+            

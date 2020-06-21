@@ -205,17 +205,23 @@ EmbedNameUpr STRING(64),AUTO
 EmbedLine   LONG 
 EmbedType   STRING(1) 
 InSource    BOOL
+!LastSection STRING(16)  !last [xxxx] does not PUSH/POP. Not used 
 Terms EQUATE('[END][ADDITION][FORMULA][SOURCE][EMBED][PROMPTS][DATA][WINDOW] [COMMON][CALLS][PROCEDURE][REPORT][MODULE][PROGRAM][FILES][PERSIST][SECONDARY][PRIMARY]')
     CODE 
     LQ &= SELF.LinesQ 
     SQ &= SELF.SourceQ 
     FREE(SQ) ; CLEAR(SQ)
     SELF.ProcCount=0
+    SELF.ProcName=''
+    SELF.FromTemplate=''
 !    GET(LQ,336)    ; SETCLIPBOARD( '=' & LQ:TxtUpr & '=' )
 !    Message('source Q read lines ' & RECORDS(LQ) &'||' & LQ:TxtUpr & |
 !            '||' & CHOOSE(LQ:TxtUpr='[EMBED]','Is Embed','Is Not') )
     LOOP X=1 TO RECORDS(LQ) 
         GET(LQ,X)
+!        IF SUB(LQ:TxtUpr,1,1)='[' THEN
+!           LastSection=LQ:TxtUpr
+!        END
         IF InSource AND SUB(LQ:TxtUpr,1,1)='[' THEN  ![SOURCE] Ends with any [xxx]
            E=INSTRING(']',LQ:TxtUpr,1)        !Does it end "]", not done by 
 !TODO this still did not catch an exta [END]            
@@ -292,6 +298,19 @@ Terms EQUATE('[END][ADDITION][FORMULA][SOURCE][EMBED][PROMPTS][DATA][WINDOW] [CO
             SQ:CodeBeg=X+1
             ADD(SQ)
             InSource=1
+
+        OF '[COMMON]'                  !Find FROM Template by looking ahead rather than trust LastSection
+            IF SELF.ProcCount=1 THEN   !In [PROCEDURE] not in [MODULE], and not Proc #2 (unsupported)
+               LOOP E=1 TO 99          !Look ahead ... expect DESCRIPTION  LONG (multi) FROM MODIFIED
+                    GET(LQ,X+E) ; IF ERRORCODE() THEN BREAK.
+                    IF SUB(LQ:TxtUpr,1,5)='FROM ' THEN
+                       SELF.FromTemplate=SUB(LQ:TxtTXA,6,128)
+                    ELSIF SUB(LQ:TxtUpr,1,1)='[' THEN
+                       BREAK 
+                    END
+               END
+               GET(LQ,X) 
+            END
         OF 'PROPERTY:END'
             IF InSource AND SQ:CodeBeg=SQ:SourceBeg+1 THEN
                 SQ:CodeBeg=X+1

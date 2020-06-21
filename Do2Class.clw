@@ -19,7 +19,7 @@ LenFastClip         PROCEDURE(CONST *STRING Text2Measure),LONG,NAME('Cla$FASTCLI
 OutputDebugString   PROCEDURE(*Cstring),RAW,PASCAL,DLL(1),NAME('OutputDebugStringA')
     END
   END
-DbgIt      BYTE(1)          !Output Debug  
+DbgIt      BYTE(0)          !Output Debug  
 DosFile    FILE,DRIVER('DOS'),PRE(DF),CREATE
     RECORD
 Block   STRING(8000)
@@ -452,8 +452,10 @@ DDD.WriteTXAFile PROCEDURE()  !Write the changed TXA by read TXAQ and merge Chan
 TXQ  &CbTxaLineQueueType  ! &= TxaCls.LinesQ so can TXQ:
 B   LONG
 ClsTxtFile  STRING(260) 
-DataEmbedLineNo1   LONG     !Line with EMBED %DATASECTION
-EmbedSectionLineNo LONG     !Line with [EMBED] to add Data after           
+DataEmbed_Code_LineNo1  LONG     !First Code Line in EMBED %DATASECTION [SOURCE] after PROPERTY:END so can add CLASS there
+DataEmbed_SOURCE_Line   LONG     !First [SOURCE] Line in EMBED %DATASECTION so can add CLASS to new Embed (better)
+EMBED_Section_LineNo    LONG     !Line with [EMBED] to add EMBED %Data and more after because there is no Data
+EMBED_DATASECTION  PSTRING(40)   !EMBED %DATA or %DECLARE depending on FromTemplate
     CODE
     IF ~TxaSaveFile THEN RETURN.
     CLOSE(DosFile)
@@ -467,7 +469,8 @@ EmbedSectionLineNo LONG     !Line with [EMBED] to add Data after
     IF Cfg:WriteClass2Data THEN DO FindFirstDataEmbedRtn. 
     TXQ &= TxaCls.LinesQ
     LOOP LineX=1 TO RECORDS(TXQ)
-        IF LineX=DataEmbedLineNo1 AND Cfg:WriteClass2Data THEN DO AddClassQToDataRtn.
+        IF LineX=DataEmbed_Code_LineNo1 AND Cfg:WriteClass2Data THEN DO AddClassQToDataRtn.
+        IF LineX=DataEmbed_SOURCE_Line  AND Cfg:WriteClass2Data THEN DO AddClassQAsNew_SOURCE_InsideEmbedRtn. !06/21/20       
         GET(TXQ,LineX)
         ChgQ:LineNo=TXQ:LineNo
         GET(ChangeQ,ChgQ:LineNo) 
@@ -484,7 +487,7 @@ EmbedSectionLineNo LONG     !Line with [EMBED] to add Data after
             IF TXQ:LenWO2 THEN ADD(DosFile,TXQ:LenWO2).
         END
         DF:Block[1:2]='<13,10>' ; ADD(DosFile,2)
-        IF LineX=EmbedSectionLineNo AND Cfg:WriteClass2Data AND ~DataEmbedLineNo1 THEN DO AddClassQAsNewDataEmbedRtn.        
+        IF LineX=EMBED_Section_LineNo  AND Cfg:WriteClass2Data THEN DO AddClassQAsNewDataEmbedRtn.        
     END
     CLOSE(DosFile) 
     Do WriteClass_FixdCode_ToTextFileRtn
@@ -509,24 +512,42 @@ WriteClass_FixdCode_ToTextFileRtn ROUTINE
     CLOSE(DosFile)
     RUN('Notepad ' & CLIP(ClsTxtFile))
     EXIT 
-FindFirstDataEmbedRtn ROUTINE 
+FindFirstDataEmbedRtn ROUTINE
+    IF INSTRING('PROCESS',UPPER(TxaCls.FromTemplate),1) |
+    OR INSTRING('REPORT',UPPER(TxaCls.FromTemplate),1)  THEN 
+       EMBED_DATASECTION=EMBED_DATA_Declaration
+    ELSE
+       EMBED_DATASECTION=EMBED_DATA_DataSection
+    END
+    IF DbgIt THEN DB('FindFirstDataEmbedRtn ROUTINE EMBED_DATASECTION=' & EMBED_DATASECTION ).
     LOOP X=1 TO RECORDS(EmbedQ)
         GET(EmbedQ,X)
         IF EmbedQ:Type=CbTxaEmbedType:Data AND UPPER(EmbedQ:Embed)=EMBED_DATASECTION THEN  !'EMBED %DECLARATIONSECTION' was 'EMBED %DATASECTION'
-           DataEmbedLineNo1 = EmbedQ:CodeBeg
+           DataEmbed_Code_LineNo1 = EmbedQ:CodeBeg
+           IF DbgIt THEN DB('FindFirstDataEmbedRtn ROUTINE DataEmbedLineNo1=' & DataEmbed_Code_LineNo1 &' - EmbedQ X=' & X &' EmbedQ:CodeBeg=' & EmbedQ:CodeBeg &' '& EmbedQ:Embed ).
+           GET(TxaQ, EmbedQ:SourceBeg)
+           IF ~ERRORCODE() AND TxaQ:TxtUpr='[SOURCE]' THEN  !This should always happen
+               IF DbgIt THEN DB('DataEmbed_SOURCE_Line=' & DataEmbed_SOURCE_Line & ' TxaQ:TxtUpr=' & TxaQ:TxtUpr ). 
+               DataEmbed_SOURCE_Line  =EmbedQ:SourceBeg     !This will insert a *New* [SOURCE] before First Data
+               DataEmbed_Code_LineNo1 =0                    !Set =0 so CLASS is NOT added to First Embed               
+           END
            EXIT
         END 
     END
-    !Did not find an EMBED_DATASECTION .. so find [EMBED]
+    !Did not find an EMBED_DATASECTION .. so find [EMBED] to add new Data Embed
     LOOP X=1 TO RECORDS(SxaQ)   !Loop my sections
         GET(SxaQ,X)
         IF SxaQ:TxtTxa='[EMBED]' THEN
-           EmbedSectionLineNo = SxaQ:LineNo !; DB('[EMBED] Line=' & EmbedSectionLineNo ) 
+           EMBED_Section_LineNo = SxaQ:LineNo !; DB('[EMBED] Line=' & EmbedSectionLineNo ) 
            EXIT 
         END
     END
 
 AddClassQAsNewDataEmbedRtn ROUTINE  !We are after [EMBED]. These was no %DataESection so make one
+    IF DataEmbed_Code_LineNo1 OR DataEmbed_SOURCE_Line THEN 
+       message('AddClassQAsNewDataEmbedRtn ROUTINE|Unexpected ?{9}' & |
+               '|DataEmbed_Code_LineNo1=' & DataEmbed_Code_LineNo1 & '|DataEmbed_SOURCE_Line=' & DataEmbed_SOURCE_Line)
+    END
     ![EMBED]  has been written
     DDD.WriteDosLine(EMBED_DATASECTION)  !Now EMBED %DECLARATIONSECTION was EMBED %DataSection
     DDD.WriteDosLine('[DEFINITION]')
@@ -534,9 +555,17 @@ AddClassQAsNewDataEmbedRtn ROUTINE  !We are after [EMBED]. These was no %DataESe
     DDD.WriteDosLine('PROPERTY:BEGIN')
 !    DDD.WriteDosLine('PRIORITY 4000')  !leave out hoping IDE picks middle
     DDD.WriteDosLine('PROPERTY:END')
-    DO AddClassQToDataRtn   !DOO CLASS 
+    DO AddClassQToDataRtn   !DOO CLASS
     DDD.WriteDosLine('[END]')
-    
+
+AddClassQAsNew_SOURCE_InsideEmbedRtn ROUTINE  !06/21/20 Before First %Data [Source] add new [Source] so DOO Class is alone
+    !After EMBED %DataSection and [DEFINITION] 
+    DDD.WriteDosLine('[SOURCE]')       !will be before DataEmbed_SOURCE_Line
+    DDD.WriteDosLine('PROPERTY:BEGIN')
+    DDD.WriteDosLine('PRIORITY 1')
+    DDD.WriteDosLine('PROPERTY:END')
+    DO AddClassQToDataRtn   !DOO CLASS
+
 AddClassQToDataRtn ROUTINE
     IF Cfg:WriteClassSorted THEN SORT(ClassQ, ClassQ:NameUPR, ClassQ:LineNo) .
     LOOP X=1 TO RECORDS(ClassQ)
