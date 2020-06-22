@@ -2,26 +2,26 @@
 
 Do2Class utility changes all DO ROUTINE code to call CLASS Methods in a Procedure. The code changes are minor, but to make the changes manually is tedious work, hence the utility to do it right with little work. I built it to be simple and reliable. I make simple changes to the TXA (no moving blocks) so that a compare of TXA file changes is easy to follow. I use it myself on large procedures. I converted KSS and put up a [KSS Do2Class Repo on Guthub](https://github.com/CarlTBarnes/Devuna-KwikSourceSearch).
 
-**Do NOT be put off by the amount I have written below. This is simple, works and any problems discussed below insert tokens like `'? Return was in Routine ?'` into the converted source that cause compiler errors so you cannot miss them.**
+**Do NOT be put off by the amount I have written below. This is simple, works and any problems discussed below insert tokens like `'? Return was in Routine ?'` into the converted source that cause compiler errors so you cannot miss them.** The only thing that can cause bugs are implicit variables passed between procedure and routine.
 
-The major benefit of the change is Methods allow passing Parameters and can have a Return Value e.g. `NyClass.IsFormOK PROCEDURE(BYTE Force),BOOL.` While there is an extra step of declaring each Method (Procedure) in a data embed CLASS declaration, that provides dort a "Table of Contents" to the local routines that were written for a specific procedure and documents the parameters and returns. With routines to pass and return you must use local variables and that is NOT solid code.
+The major benefit of the change is Methods allow passing Parameters and can have a Return Value e.g. `NyClass.IsFormOK PROCEDURE(BYTE Force),BOOL.` While there is an extra step of declaring each Method (Procedure) in a data embed CLASS declaration, that provides sort a "Table of Contents" to the local routines that were written for a specific procedure and documents the parameters and returns. With routines to pass and return you must use local variables and that is NOT solid code.
 
-The Class name I prefer to use to replace routines is **DOO CLASS**. I am used to typing `DO` so that makes it easy and I like that it implies it replaces `DO`. You can use any name you like. If you are extracting the class for use elsewhere then give it a logical name like "NameParserClass". Also check the SELF option.
+The Class name I prefer to use to replace routines is **DOO CLASS**. I am used to typing `DO` so that makes it easy and I like that it implies it replaces `DO`. You can use any name you like. If you plan to extract the class for use elsewhere then give it a logical name like "ParserClass" and also check the SELF option.
 
-Watch the June 19, 2020 presentation on [Clarion Live](https://www.clarionlive.com/) up has YouTube video [Do2Class - Easy change from Routine to Class](https://www.youtube.com/watch?v=8WV_Y_hQEoY&feature=youtu.be). You should also watch 237 and 239 "Lisa's First Class" where most everything done manually is done by Do2Class.
+Watch the June 19, 2020 presentation on [Clarion Live](https://www.clarionlive.com/) or on YouTube [Do2Class - Easy change from Routine to Class](https://www.youtube.com/watch?v=8WV_Y_hQEoY&feature=youtu.be). You should also watch 237 and 239 "Lisa's First Class" where most everything done manually is done by Do2Class.
 
 ### Procedure for Do2Class
 
-The process for converting in short is Export one Procedure to TXA, Load TXA in Do2Class, Save Do2Class.TXA, Import Do2Class.TXA to APP, Build, Review. To undo the changes import the original TXA. Compare the before and after CLW files you can review **exactly** what was changed.
+The process for converting in short is Export one Procedure to TXA, Load TXA in Do2Class, Save Do2Class.TXA, Import Do2Class.TXA to APP, Build, Review. To undo the changes import the original TXA. Compare the before and after CLW files you can review **exactly** what was changed. You can also compare TXA files.
 
 - [ ] Backup your APP, CwProj, SLN, CLW files for restore. Also for CLW comparison
-- [ ] Export One Procedure to TXA and name it APP_ProcName.TXA
-- [ ] Do2Class Load above TXA
-- [ ] Review the tabs Steps, Omit, Problems, Implicits
-- [ ] Do2Class Save TXA it will be named App_ProcName_Do2Class_.TXA
-- [ ] In the APP Import App_ProcName_Do2Class_.TXA
-- [ ] Build - Review errors and fix - Run
-- [ ] To understand the process compare CLWs to see exact changes (eventually skip)
+- [ ] Clarion: Export One Procedure to TXA and name it APP_ProcName.TXA
+- [ ] Do2Class: Load above TXA
+- [ ] Do2Class: Review the tabs Steps, Omit, Problems, Implicits
+- [ ] Do2Class: Save TXA it will be named App_ProcName_Do2Class_.TXA
+- [ ] Clarion: Import App_ProcName_Do2Class_.TXA
+- [ ] Clarion: Build - Review errors and fix - Run
+- [ ] To understand the process compare CLWs to see exact changes (eventually skip). A quick check of the CLW is after conversion the  line count should have increased 1x - 2x the routine count. Each gets 1 new line to declare the method, plus 1 CODE line, minus 1 line if it had DATA.
 - [ ] Undo the changes by simply importing the original TXA export APP_ProcName.TXA
 
 This method will also work with module TXA files as long as they only contain one procedure. It will work with APV files used for version control so it will work with @Rick-UpperPark [Upper Park](http://www.upperparksolutions.com/) integration tool.
@@ -95,7 +95,11 @@ Certain code can cause issues when changed from a Routine to a Class Method. Do2
 
 ### Warning – Duplicate Symbol
 
-If a Procedure defines a variable name and that same variable name is also defined in a Routine or Class Method then you have a "Duplicate Symbol". The variables can have different types, they will use their locally defined type. In a Routine the duplicate does NOT cause a warning, but once changed to a Method the compiler will throw a warning. There is nothing that *must* be fixed, but it is usually best to refactor the code to NOT have a duplicate.
+If a Procedure defines a variable name and that same variable name is also defined in a Routine or Class Method then you have a "Duplicate Symbol". The variables can have different types, they will use their locally defined type because it is a local variable. In a Routine the duplicate does NOT cause a warning, but once changed to a Method the compiler will throw a warning. The code works the same.
+
+There is nothing that *must* be fixed, but it is usually best to refactor the code to NOT have a duplicate by renaming the variable in the Method code or ... This may have revealed a subtle bug in your program. The local duplicate variable is an independent variable. If the routine was relying on referencing the procedure variable that was NOT happening. You may cause a subtle bug (a regression) if you simply remove the local declaration because the method will then be changing the Procedure's variable and that may have not been intended, it may be corrupting the procedures variable.
+
+For Example, in my tests I found KSS had defined `Save_Record STRING(SIZE(Pre:Record))` in a Procedure and also a Routine. Once changed to a Method that caused a compiler duplicate warning. In my video I just commended out the Method declaration to remove the warning. BUT that would cause a subtle bug (regression) because now the Method would change the Procedure's Save_Record variable. I should have renamed the variable in the Method data and code. Renaming in the Procedure also would assure I changed all of them or I would get errors.
 
 ```clarion
 MyReport PROCEDURE()
@@ -172,10 +176,12 @@ MyClass.SelectLabel PROCEDURE()  !Routine change to Class Method
 
 ### Possible Problem – Implicit variables
 
+**Implicit variables can cause regressions in this conversion if they are used to "pass parameters" or the code relies on their value persisting between calls.**
+
 Best move is don’t use Implicit Variables ever, or beyond a few lines of code. Read the help on "Implicit Variables" and note it says
 > Therefore, implicit variables should be **used with care and caution**, and **only within a limited scope** (or **not at all**).
 
-An Implicit value set in the Procedure then used in a Routine (i.e. like a parameter) will work and the value persists. When changed to a Class Method the Implicit will be a **independent local variable** for that Method and the code **will NOT work like the Routine**. Implicits with Routines is discussed in the help and the scope and persistence varies based on code and pragma so best move is **do not use implicits**.
+An Implicit value set in the Procedure then used in a Routine (i.e. like a parameter) will work and the value persists. When changed to a Class Method the Implicit will be a **independent local variable** for that Method and the code **will NOT work like the Routine**. Implicits in Routines is discussed by the help and the scope and persistence varies based if the procedure also defined it and  a pragma, so best move is **do not use implicits**.
 
 ```clarion
     SayHi# = True
