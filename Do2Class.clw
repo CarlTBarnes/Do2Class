@@ -1,3 +1,5 @@
+!   Version 2020-06-23--08:02
+
 ![ ] Write Option ONE Method per Embed to split big embeds with many routines 
 !
   PROGRAM 
@@ -349,7 +351,7 @@ EPX LONG
             ChgQ:LineNo= EmbedQ:EmbedLnNo
             ChgQ:ALine=  EmbedQ:Embed
             ChgQ:NLine=  'EMBED %LocalProcedures'
-            ADD(ChangeQ) 
+            ADD(ChangeQ,ChgQ:LineNo) 
         END
    END
    RETURN 
@@ -456,6 +458,7 @@ DataEmbed_Code_LineNo1  LONG     !First Code Line in EMBED %DATASECTION [SOURCE]
 DataEmbed_SOURCE_Line   LONG     !First [SOURCE] Line in EMBED %DATASECTION so can add CLASS to new Embed (better)
 EMBED_Section_LineNo    LONG     !Line with [EMBED] to add EMBED %Data and more after because there is no Data
 EMBED_DATASECTION  PSTRING(40)   !EMBED %DATA or %DECLARE depending on FromTemplate
+WriteTagImplicitLines   LIKE(Cfg:TagImplicitLines)  !Skip tag if none, or NoChangeWrite test
     CODE
     IF ~TxaSaveFile THEN RETURN.
     CLOSE(DosFile)
@@ -466,7 +469,8 @@ EMBED_DATASECTION  PSTRING(40)   !EMBED %DATA or %DECLARE depending on FromTempl
        Message('Unable to Create and Open TXA to Write with Do2Class|Error: ' & ErrorCode()&' '&Error()&'||' &  TxaSaveFile)
        RETURN
     END
-    IF Cfg:WriteClass2Data THEN DO FindFirstDataEmbedRtn. 
+    WriteTagImplicitLines=CHOOSE(Cfg:TagImplicitLines AND RECORDS(ImpliQ)>0 AND ~WriteNoChanges)
+    IF Cfg:WriteClass2Data AND ~WriteNoChanges THEN DO FindFirstDataEmbedRtn. 
     TXQ &= TxaCls.LinesQ
     LOOP LineX=1 TO RECORDS(TXQ)
         IF LineX=DataEmbed_Code_LineNo1 AND Cfg:WriteClass2Data THEN DO AddClassQToDataRtn.
@@ -478,12 +482,12 @@ EMBED_DATASECTION  PSTRING(40)   !EMBED %DATA or %DECLARE depending on FromTempl
             IF Cfg:OmitDATAline THEN
                IF ChgQ:NLine[1]='!' AND LEFT(SUB(ChgQ:NLine,2,9999))='DATA' THEN CYCLE.
             END 
-            IF Cfg:TagImplicitLines THEN DDD.WriteTagImplicit(TXQ:LineNo,ChgQ:NLine).
+            IF WriteTagImplicitLines THEN DDD.WriteTagImplicit(TXQ:LineNo,ChgQ:NLine).
             DF:Block=ChgQ:NLine
             ADD(DosFile,LenFastClip(DF:Block))
-        ELSE !No change
+        ELSE !No change to line
             DF:Block=TXQ:TxtTxa   !FYI TXQ:TxtTxa is &STRING of exact size
-            IF Cfg:TagImplicitLines THEN DDD.WriteTagImplicit(TXQ:LineNo,DF:Block,TXQ:LenWO2).
+            IF WriteTagImplicitLines THEN DDD.WriteTagImplicit(TXQ:LineNo,DF:Block,TXQ:LenWO2).
             IF TXQ:LenWO2 THEN ADD(DosFile,TXQ:LenWO2).
         END
         DF:Block[1:2]='<13,10>' ; ADD(DosFile,2)
@@ -543,6 +547,9 @@ FindFirstDataEmbedRtn ROUTINE
         END
     END
 
+!---------------------------------
+!FYI Only ONE of these should be >0 so only ONE Add CLASS routine should run so it is done 3 different ways depending ...
+!    Only ONE > 0 --of--> DataEmbed_Code_LineNo1  DataEmbed_SOURCE_Line  EMBED_Section_LineNo
 AddClassQAsNewDataEmbedRtn ROUTINE  !We are after [EMBED]. These was no %DataESection so make one
     IF DataEmbed_Code_LineNo1 OR DataEmbed_SOURCE_Line THEN 
        message('AddClassQAsNewDataEmbedRtn ROUTINE|Unexpected ?{9}' & |
@@ -1022,7 +1029,7 @@ ChangeQSaveRtn ROUTINE
     LOOP LineX= 1 TO RECORDS(CodeQ)
         GET(CodeQ,LineX)
         ChangeQ :=: CodeQ
-        ADD(ChangeQ)
+        ADD(ChangeQ,ChgQ:LineNo)
     END
 ChangeQCompareRtn ROUTINE   !CodeQ was saved to
     DATA   

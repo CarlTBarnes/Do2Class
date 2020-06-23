@@ -15,5 +15,7 @@
             Add new [SOURCE] embed with DOO CLASS instead of prepending to first Data Embed
             CbTxaClass add new Property .FromTemplate to know if REPORT or PROCESS
 
+06/23/20    TXA LIST had Beg/End columns from wrong Queue fields. 
+            WriteTXA minor improve Implicit tag code and comment.
             
             

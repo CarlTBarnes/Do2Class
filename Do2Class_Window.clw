@@ -6,11 +6,13 @@ IsTXAinput  BYTE(1)  !0=Source
 ParseOnly   BYTE
 Cfg:Do2DataEmbeds       BYTE    !Cfg:Do2DataEmbeds  !n/a save
 Cfg:Do2LocalProc        BYTE    !Cfg:Do2LocalProc   !n/a save
-Cfg:Do2MethodCode       BYTE    !Cfg:Do2MethodCode  !do not save as default, doubt works
+Cfg:Do2MethodCode       BYTE    !Cfg:Do2MethodCode  !do not save as default, doubt works 
+!Future Cfg:OnePerEmbed         BYTE(1) !06/22/20 Split Routines into 1 Per Embed in TXXA Write
+
 ConfigGrp   GROUP,PRE(Cfg) 
 !Do2DataEmbeds       BYTE        !Cfg:Do2DataEmbeds
 !Do2LocalProc        BYTE        !Cfg:Do2LocalProc
-NoMoveRoutines      BYTE        !Cfg:NoMoveRoutines 
+NoMoveRoutines      BYTE        !Cfg:NoMoveRoutines   Do NOT move %Routine to %LocalProcedures
 OmitDATAline        BYTE(1)     !Cfg:OmitDATAline
 SELFinClass         BYTE        !Cfg:SELFinClass
 WriteClass2Data     BYTE(1)     !Cfg:WriteClass2Data
@@ -111,7 +113,7 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                     TAB('  TXA File  '),USE(?Tab_TxaFile)
                         LIST,AT(1,71),FULL,USE(?LIST:TxaQ),HVSCROLL,FONT('CONSOLAS',10),VCR,FROM(TxaQ), |
                                 FORMAT('30R(2)|FM~Line#~L(2)@n_5@20R(2)|M~Len~L(2)@n7@30R(2)|M~BegPo' & |
-                                's~L(2)@n7@#5#30R(2)|M~EndPos~L(2)@n7@30L(2)Y~TXA Line Text - Right ' & |
+                                's~L(2)@n7@#6#30R(2)|M~EndPos~L(2)@n7@30L(2)Y~TXA Line Text - Right ' & |
                                 'click for options~@s255@#3#'),ALRT(EnterKey)
                     END
                     TAB('  TXA [EMBED]  '),USE(?Tab_Txa_EMBED)
