@@ -2,7 +2,8 @@
 
 ![ ] Write Option ONE Method per Embed to split big embeds with many routines 
 !
-  PROGRAM 
+  PROGRAM
+VersionDo2Class EQUATE('Do2Class Version 07-01-20.1750')  
   INCLUDE('KEYCODES.CLW'),ONCE
   INCLUDE('CBTxa2Q.INC'),ONCE     
 
@@ -38,7 +39,7 @@ Do2Class        PROCEDURE()
   TxaLoadFile='Carlbase_Main.txa' 
   SYSTEM{PROP:PropVScroll}=1
   SYSTEM{PROP:MsgModeDefault}=MSGMODE:CANCOPY
-  OPEN(Window)
+  OPEN(Window) ; 0{PROP:Text}=0{PROP:Text} &' - '& VersionDo2Class
   DDD.PrepareWindow()
   
   POST(EVENT:Accepted,?IsTXAinput)
@@ -123,7 +124,7 @@ Do2Class        PROCEDURE()
         DDD.TreeExpandContract(XRef2Q, XRef2Q.Level, A)
     OF ?XRefCopyBtn ; DDD.XRefCopy()
     OF ?XRefDbgBtn ; UNHIDE(?TabXRefDebug) ; SELECT(?TabXRefDebug)
-    OF ?LIST:ChangeQ ; GET(ChangeQ,CHOICE(?LIST:ChangeQ)) ; DDD.RightClickLine(ChangeQ:LineNo)
+    OF ?LIST:ChangeQ ; GET(ChangeQ,CHOICE(?LIST:ChangeQ)) ; DDD.RightClickLine(ChgQ:LineNo, ChgQ:ALine)
                        IF KEYCODE()=MouseLeft2 
                           SETKEYCODE(0) 
                           ?LIST:ChangeQ:SbS{PROP:Selected}=?LIST:ChangeQ{PROP:Selected}
@@ -132,7 +133,7 @@ Do2Class        PROCEDURE()
 !                          SourceQ:LineNo=ChangeQ:LineNo ; GET(SourceQ,SourceQ:LineNo) ; SELECT(?List:SourceQ,POINTER(SourceQ))    
                        END
     OF ?LIST:ChangeQ:SbS  ; GET(ChangeQ,CHOICE(?LIST:ChangeQ:SbS)) ; POST(EVENT:Accepted,?LIST:ChangeQ)                      
-    OF ?LIST:ClassQ   ; GET(ClassQ,CHOICE(?LIST:ClassQ)) ; DDD.RightClickLine(ClassQ:LineNo)
+    OF ?LIST:ClassQ   ; GET(ClassQ,CHOICE(?LIST:ClassQ)) ; DDD.RightClickLine(ClassQ:LineNo, ClassQ:Declare)
                         IF KEYCODE()=MouseLeft2 THEN 
                            SETKEYCODE(0) 
                            ChangeQ:LineNo=ClassQ:LineNo 
@@ -144,42 +145,42 @@ Do2Class        PROCEDURE()
                            END
                            SourceQ:LineNo=ClassQ:LineNo  ; GET(SourceQ,SourceQ:LineNo) ; SELECT(?List:SourceQ,POINTER(SourceQ))                            
                         END
-    OF ?LIST:CodeQ    ; GET(CodeQ,CHOICE(?LIST:CodeQ)) ; DDD.RightClickLine(CodeQ:LineNo)
+    OF ?LIST:CodeQ    ; GET(CodeQ,CHOICE(?LIST:CodeQ)) ; DDD.RightClickLine(CodeQ:LineNo, CodeQ:ALine)
                         DDD.SelectSourceQLine(CodeQ:LineNo)
 
-    OF ?LIST:CodeOU   ; GET(CodeQ,CHOICE(?LIST:CodeOU)) ; DDD.RightClickLine(CodeQ:LineNo)
+    OF ?LIST:CodeOU   ; GET(CodeQ,CHOICE(?LIST:CodeOU)) ; DDD.RightClickLine(CodeQ:LineNo,CodeQ:ALine)
                         DDD.SelectSourceQLine(CodeQ:LineNo)
 
-    OF ?LIST:ProblmQ  ; GET(ProblmQ,CHOICE(?LIST:ProblmQ)) ; DDD.RightClickLine(ProblmQ:LineNo)
+    OF ?LIST:ProblmQ  ; GET(ProblmQ,CHOICE(?LIST:ProblmQ)) ; DDD.RightClickLine(ProbQ:LineNo,ProbQ:ALine)
                         IF KEYCODE()=MouseLeft2 THEN  
                            !DDD.SelectSourceQLine(ImpliQ:LineNo)
                            CodeQ:LineNo=ProblmQ:LineNo ; GET(CodeQ,CodeQ:LineNo) ; SELECT(?List:CodeQ,POINTER(CodeQ))                          
                         END
 
-    OF ?LIST:ImpliQ   ; GET(ImpliQ,CHOICE(?LIST:ImpliQ)) ; DDD.RightClickLine(ImpliQ:LineNo)
+    OF ?LIST:ImpliQ   ; GET(ImpliQ,CHOICE(?LIST:ImpliQ)) ; DDD.RightClickLine(ImpliQ:LineNo,ImpliQ:Aline)
                         IF KEYCODE()=MouseLeft2 THEN  
                            !DDD.SelectSourceQLine(ImpliQ:LineNo)
                            CodeQ:LineNo=ImpliQ:LineNo ; GET(CodeQ,CodeQ:LineNo) ; SELECT(?List:CodeQ,POINTER(CodeQ))                          
                         END
 
-    OF ?LIST:OmitQ   ; GET(OmitQ,CHOICE(?LIST:OmitQ)) ; DDD.RightClickLine(OmitQ:LineNo)
+    OF ?LIST:OmitQ   ; GET(OmitQ,CHOICE(?LIST:OmitQ)) ; DDD.RightClickLine(OmtQ:LineNo, OmtQ:Aline)
                         IF KEYCODE()=MouseLeft2 THEN  
                            CodeQ:LineNo=OmitQ:LineNo ; GET(CodeQ,CodeQ:LineNo) ; SELECT(?List:CodeQ,POINTER(CodeQ))                          
                         END
                         
-    OF ?LIST:EmbedQ   ; GET(EmbedQ,CHOICE(?LIST:EmbedQ)) ; DDD.RightClickLine(EmbedQ:CodeBeg)
+    OF ?LIST:EmbedQ   ; GET(EmbedQ,CHOICE(?LIST:EmbedQ)) ; DDD.RightClickLine(EmbedQ:CodeBeg,EmbedQ:CodeLine1)
                         IF KEYCODE()=MouseLeft2 THEN
                            ?List:TxaQ{PROP:YOrigin}=EmbedQ:SourceBeg
                            TxaQ:LineNo=CHOOSE(~EmbedQ:CodeBeg,EmbedQ:SourceBeg,EmbedQ:CodeBeg)
                            GET(TxaQ,TxaQ:LineNo) ; SELECT(?List:TxaQ,POINTER(TxaQ))    
                            SETKEYCODE(0)
                         END
-    OF ?LIST:SourceQ  ; GET(SourceQ,CHOICE(?LIST:SourceQ))  ; DDD.RightClickLine(SourceQ:LineNo)
+    OF ?LIST:SourceQ  ; GET(SourceQ,CHOICE(?LIST:SourceQ))  ; DDD.RightClickLine(SourceQ:LineNo, SourceQ:TxtTxa)
                         IF KEYCODE()=MouseLeft2 AND IsTXAinput 
                            TxaQ:LineNo=SourceQ:LineNo ; GET(TxaQ,TxaQ:LineNo) ; SELECT(?List:TxaQ,POINTER(TxaQ))    
                            SETKEYCODE(0)
                         END
-    OF ?LIST:TxaQ     ; GET(TxaQ,CHOICE(?LIST:TxaQ))  ; DDD.RightClickLine(TxaQ:LineNo) 
+    OF ?LIST:TxaQ     ; GET(TxaQ,CHOICE(?LIST:TxaQ))  ; DDD.RightClickLine(TxaQ:LineNo, TxaQ:TxtTxa) 
                         IF KEYCODE()=MouseLeft2 
                            SETKEYCODE(0) 
                            SourceQ:LineNo=TxaQ:LineNo 
@@ -187,19 +188,19 @@ Do2Class        PROCEDURE()
                            IF ERRORCODE() THEN GET(SourceQ,POSITION(SourceQ)).  !Find next closest SourceQ, must have SORT(
                            IF ~ERRORCODE() THEN SELECT(?List:SourceQ,POINTER(SourceQ)).
                          END  
-    OF ?LIST:SxaQ     ; GET(SxaQ,CHOICE(?LIST:SxaQ))  ; DDD.RightClickLine(SxaQ:LineNo) 
+    OF ?LIST:SxaQ     ; GET(SxaQ,CHOICE(?LIST:SxaQ))  ; DDD.RightClickLine(SxaQ:LineNo, SxaQ:TxtTxa) 
                         IF KEYCODE()=MouseLeft2 
                            SETKEYCODE(0) 
                            TxaQ:LineNo=SxaQ:LineNo 
                            GET(TxaQ,TxaQ:LineNo) 
                            SELECT(?List:TxaQ,POINTER(TxaQ))
                          END 
-    OF ?LIST:XRefQ   ; GET(XRefQ,CHOICE(?LIST:XRefQ)) ; DDD.RightClickLine(XRefQ:LineNo)
+    OF ?LIST:XRefQ   ; GET(XRefQ,CHOICE(?LIST:XRefQ)) ; DDD.RightClickLine(XRefQ:LineNo, XRefQ:ALine)
                         IF KEYCODE()=MouseLeft2 THEN 
                            DDD.SelectSourceQLine(XRefQ:LineNo)
                            CodeQ:LineNo=XRefQ:LineNo ; GET(CodeQ,CodeQ:LineNo) ; SELECT(?List:CodeQ,POINTER(CodeQ))                           
                         END 
-    OF ?LIST:XRef2Q   ; GET(XRefQ,CHOICE(?LIST:XRef2Q)) ; DDD.RightClickLine(XRef2Q:LineNo)
+    OF ?LIST:XRef2Q   ; GET(XRefQ,CHOICE(?LIST:XRef2Q)) ; DDD.RightClickLine(XRef2Q:LineNo, XRef2Q:ALine)
                         IF KEYCODE()=MouseLeft2 THEN 
                            DDD.SelectSourceQLine(XRef2Q:LineNo)
                            CodeQ:LineNo=XRef2Q:LineNo ; GET(CodeQ,CodeQ:LineNo) ; SELECT(?List:CodeQ,POINTER(CodeQ))                           
@@ -379,7 +380,8 @@ Nxt BOOL
 DDD.LoadSourceQFromTxaQ PROCEDURE()
 EPX LONG   
 SX  LONG   
-Blanks  LONG   
+Blanks  LONG
+LocalProcLine1  LONG    
     CODE
         LOOP SX=1 TO RECORDS(TXAQ) 
             GET(TxaQ,SX)
@@ -405,6 +407,7 @@ Blanks  LONG
                   CYCLE
               END
         OF CbTxaEmbedType:LocalPro
+              IF ~LocalProcLine1 THEN LocalProcLine1=Epx.   !07/01/20
               IF ~Cfg:Do2LocalProc AND EmbedQ:Type = CbTxaEmbedType:LocalPro THEN
                   EmbedQ:CodeLine1 ='--SKIP-LocPro->' & EmbedQ:CodeLine1
                   PUT(EmbedQ)
@@ -437,7 +440,29 @@ Blanks  LONG
         SORT(SourceQ,SourceQ:LineNo)
     END 
     ?SourceQRecs{PROP:Text}=RECORDS(SourceQ) & ' Source lines out of ' & |
-                RECORDS(TxaQ) &' TXA file lines, skipped ' & Blanks & ' blanks'              
+                RECORDS(TxaQ) &' TXA file lines, skipped ' & Blanks & ' blanks'
+    IF LocalProcLine1 THEN  !07/01/20                
+       SELECT(?LIST:EmbedQ,LocalProcLine1)
+       DISPLAY
+       MESSAGE('There are %LocalProcedure embeds (LPE) which will '&|
+            'prevent Do2Class from moving converted Routine Embeds (PRE) to the LP '&|
+            'embed point.'&|
+            '||You may get compile errors on generated routines until you move '&|
+            'the converted Routine embeds to the LPE embed point using cut/paste.'&|
+            '||A workaround is to move the LP embeds up to the end of Routines, AND best to comment the '&|
+            'code so it is not processed (if it has routines),'&|    
+            '|then export to TXA again and name it APP_Procedure_NoLPE.TXA.' & |
+            '|After importing the Do2Class TXA uncomment these LP embeds (they will have been moved back to LPE).', |
+            'Local Procedure Embeds Exist', ICON:Asterisk)
+       !07/01/20 Having LocalProcedures prevents Do2Class from moving the Routine embeds converted to Classes from 
+       !         being moved to Local Procedures. In a Legqacy Form/Browse Template having Class methods in 
+       !         a Routines embed will likely cause compile errors because that will put generated routines 
+       !         below and they are then part of the last method. The errors make this impossible to miss.
+       !         Workaround is to move those embeds up into Routines. If those embeds contain ROUTINEs, 
+       !         i.e. the local procedures have routines, then comment out the code so it is not processed.
+       !         I should consider coding this to deal with moving Routines to LPE ... it makes more TXA changes
+       !         than I prefer but then again it works.
+    END
     RETURN                
 !------------------------- 
 DDD.WriteTagImplicit    PROCEDURE(LONG TXQ_LineNo,*STRING CodeLn, <*LONG Out_LenWO2>)
@@ -1329,11 +1354,12 @@ F LONG(0)
     END !Loop   
     RETURN
 !--------------------
-DDD.RightClickLine PROCEDURE(LONG LineNo)
+DDD.RightClickLine PROCEDURE(LONG LineNo, <STRING CopyText>)
   CODE
   IF KEYCODE()<>MouseRight THEN RETURN.
   SETKEYCODE(0)
-  X=POPUP('Line '& LineNo &' Jump to Tab' & |  !#1                                
+  X=POPUP('Line '& LineNo &' Jump to Tab' & |  !#1
+          CHOOSE(~OMITTED(CopyText) AND CopyText,'|','|~') &'Copy Text' & |
             '|-' & |                                        
             '|TXA Q Load' & |   !#2    ?TabTxaLoad                               
             '|Source Embed Q' & |      !#3    ?TabTxaEmbeds                               
@@ -1344,9 +1370,10 @@ DDD.RightClickLine PROCEDURE(LONG LineNo)
             '|Code Over-Under' & |   !#8    ?TabCodeOU                              
             '|Implicit #$"' & | !#9    ?TabImpliQ                            
             '')                                             
-                                                            
-  CASE X                                                  
-  !OF 0 TO 1 ; RETURN ! # 1  Line # Jump
+                                                          
+  CASE X-1                                                  
+  !OF -1, 0 TO 1 ; RETURN 
+  OF  1 ; SETCLIPBOARD(CLIP(LEFT(CopyText)))
   OF  2                              ! # 2  TXA Load       ?TabTxaLoad
         TxaQ:LineNo=LineNo ; GET(TxaQ,TxaQ:LineNo) ; SELECT(?List:TxaQ,POINTER(TxaQ))    
   OF  3                              ! # 3  Embeds Q       ?TabTxaEmbeds 

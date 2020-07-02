@@ -1,21 +1,32 @@
-2017        First version
+TODO: Code Filter Tab - e.g. LIST and ENTRY type "I# "and see all lines that contain "I#"
+===================== Do2Class History ===================== 
 
-06/18/20    First Public Commit
+07-01-20.1750    VersionDo2Class EQUATE('Do2Class Version 07-01-20.1750') 
+            Added VersionDo2Class EQUATE() and put in Caption 
+            Added [GROUP] section (code template) to TXA Parse class. 
+            Right-click popup "Copy Text" on most lists.
+            Warn if there are already Local Procedure Embeds and suggest moving to Routines so convert works better.,
+            
+06/23/20    TXA LIST had Beg/End columns from wrong Queue fields. 
+            WriteTXA minor improve Implicit tag code and comment.
 
-06/18/20    File Dialog add APV files for version controled APPs and Rick Martin's tool
-
-06/21/20    ReadMe.md completed with instructions
+06/21/20    Only use "EMBED %DECLARATIONSECTION' in REPORT or PROCESS else use EMBED %DATASECTION
+            Add new [SOURCE] embed with DOO CLASS instead of prepending to first Data Embed
+            CbTxaClass add new Property .FromTemplate to know if REPORT or PROCESS
 
 06/21/20    Save TXA Tab add Edit button to open saved TXA. 
             DDD.EditSaveFn PROCEDURE() to open TXA in Editor. EXE name and swicthes from Editor.INI file
             Warning if file had no Routines, and suggest they may be in %LocalProcedures ... incorrectly
             Cosmetic changes
-            
-06/21/20    Only use "EMBED %DECLARATIONSECTION' in REPORT or PROCESS else use EMBED %DATASECTION
-            Add new [SOURCE] embed with DOO CLASS instead of prepending to first Data Embed
-            CbTxaClass add new Property .FromTemplate to know if REPORT or PROCESS
 
-06/23/20    TXA LIST had Beg/End columns from wrong Queue fields. 
-            WriteTXA minor improve Implicit tag code and comment.
+06/21/20    ReadMe.md completed with instructions
+
             
+06/18/20    File Dialog add APV files for version controled APPs and Rick Martin's tool
+
+06/18/20    First Public Commit
+
+2017        First version
             
+
+

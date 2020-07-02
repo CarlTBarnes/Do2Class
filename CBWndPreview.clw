@@ -12,7 +12,7 @@
 !--------------------------
 ! CBWndPreviewClass by Carl Barnes December 2018 - Free for use by all - Please acknowledge me as source for this code
 !--------------------------
-VersionWndPrv EQUATE('WndPrv 06-04-20.1842')
+VersionWndPrv EQUATE('WndPrv 06-26-20.1245')
     INCLUDE('KEYCODES.CLW'),ONCE
     INCLUDE('EQUATES.CLW'),ONCE
 CREATE:Slider_MIA   EQUATE(36)      !Not defined in Equates until C11 sometime
@@ -67,7 +67,7 @@ _9  PROCEDURE
 _10 PROCEDURE
 _11 PROCEDURE
 _12 PROCEDURE
-_Address PROCEDURE(),LONG !+30h Address of a variable
+_Address PROCEDURE(),LONG !+30h Address of a variable - IFF &Ref and not Null
 _14 PROCEDURE
 _15 PROCEDURE
 _16 PROCEDURE
@@ -148,8 +148,11 @@ TypeHasAltKey       PROCEDURE(LONG PropType, LONG FEQ=0),BOOL
 TypeIsLIST          PROCEDURE(LONG PropType),BYTE ! 1=List 2=Combo Drop +10h
 DB                  PROCEDURE(STRING DbTxt),PRIVATE
         MODULE('RTL')
-ClaFieldNameRTL     PROCEDURE(LONG pFEQ),CSTRING,RAW,NAME('Cla$FIELDNAME')
-LenFastClip         PROCEDURE(CONST *STRING Text2Measure),LONG,NAME('Cla$FASTCLIP')
+ClaFieldNameRTL  PROCEDURE(LONG pFEQ),CSTRING,RAW,NAME('Cla$FIELDNAME'),DLL(dll_mode)
+LenFastClip      PROCEDURE(CONST *STRING Text2Measure),LONG,NAME('Cla$FASTCLIP'),DLL(dll_mode)
+ClaEventNameRTL  PROCEDURE(LONG EventPlusA000h),*CSTRING,RAW,NAME('WslDebug$MsgName'),DLL(dll_mode)
+C5LogSetName     PROCEDURE(CONST *CSTRING),NAME('WslDebug$SetLogFile'),DLL(dll_mode)
+C5LogPrint       PROCEDURE(STRING),NAME('WslDebug$Print'),DLL(dll_mode)
         END
         MODULE('Win32') !Win API at line 320
 AppendMenu      PROCEDURE(LONG hMenu, LONG uFlags, LONG uIDNewItem, <*CSTRING lpNewItem> ),BOOL,RAW,PASCAL,DLL(1),PROC,NAME('AppendMenuA')
@@ -209,7 +212,7 @@ GridClr         LONG(8080h)
 ConfigKey   EQUATE('Software\CarlBarnes\WinPreview')
 !EndRegion Global Data
 !Region System Menu Class SysMenuClass
-SysMenuClsQ     QUEUE,PRE(SysMnQ),THREAD
+SysMenuClsQ     QUEUE,PRE(SysMnQ),THREAD,PRIVATE
 WinRef              &WINDOW !SysMnQ:WinRef
 hWindow             LONG    !SysMnQ:hWindow
 OrigWndProc         LONG    !SysMnQ:OrigWndProc
@@ -219,7 +222,7 @@ CloseMe             BYTE    !SysMnQ:CloseMe
 ZOrder              BYTE    !SysMnQ:ZOrder
 HidePWnd            BYTE    !SysMnQ:HidePWnd
                 END
-SysMenuClass CLASS,TYPE  
+SysMenuClass CLASS,TYPE,PRIVATE  
 bInited         BYTE
 WindowRef       &WINDOW
 hWindow         LONG
@@ -239,7 +242,7 @@ SMCmd_RunAgain    EQUATE    !RUN this Preview.exe again
                 END           
 !EndRegion SysMenuClass
 !Region Classes
-CwHelpCls CLASS,TYPE
+CwHelpCls CLASS,TYPE,PRIVATE
 OpenHelp    PROCEDURE(string sHlp)  !Open a "~Context.htm" or "Keyword"
 bInit       BYTE
 HHLoaded    BYTE
@@ -248,7 +251,7 @@ IsInited    PROCEDURE(),BYTE
 HHOcxLoad   PROCEDURE(),BOOL
 HHCaller    PROCEDURE(long HH_Command, long dwData=0)
           END
-CBSortClass CLASS,TYPE
+CBSortClass CLASS,TYPE,PRIVATE
 QRef        &QUEUE
 FEQ         LONG
 ColumnNow   SHORT            
@@ -261,7 +264,7 @@ Init        PROCEDURE(QUEUE ListQueue, LONG ListFEQ, SHORT SortColumnNow=0)
 SetSortCol  PROCEDURE(SHORT SortColNow)
 HeaderPressed PROCEDURE(SHORT ForceSortByColumn=0) !Call in OF EVENT:HeaderPressed for LIST
     END
-BevClass    CLASS,TYPE
+BevClass    CLASS,TYPE,PRIVATE
 Style  &LONG
 StyFEQ LONG
 BOFeq  LONG
@@ -273,7 +276,7 @@ AllBtn       PROCEDURE()
 BtnConfig    PROCEDURE(BYTE Edge1To8, BYTE StyleNRLG),PROTECTED
 Edge2Style   PROCEDURE(),PROTECTED
                     END
-CBLocateCls CLASS,TYPE
+CBLocateCls CLASS,TYPE,PRIVATE
 Init          PROCEDURE(QUEUE QRef, LONG ListFEQ, LONG FindTextFEQ, LONG BtnNextFEQ, LONG BtnPrevFEQ, BYTE Hack=0)
 Kill          PROCEDURE()
 DisableIfNone PROCEDURE()
@@ -299,6 +302,7 @@ CBWndPreviewClass.Construct        PROCEDURE()
 CBWndPreviewClass.Destruct PROCEDURE()
 !---------------------------------------
     CODE
+    IF SELF.EvtLog.Started THEN SELF.EvtLogStop().
     IF NOT SELF.FeqNmQ &= NULL THEN FREE(SELF.FeqNmQ) ; DISPOSE(SELF.FeqNmQ).
     IF NOT SELF.GridQ &= NULL THEN FREE(SELF.GridQ) ; DISPOSE(SELF.GridQ).
     RETURN
@@ -616,6 +620,7 @@ SortCls CBSortClass
   CODE
   SYSTEM{7A58h}=1 ; SYSTEM{7A7Dh}=MSGMODE:CANCOPY !PROP:PropVScroll PROP:MsgModeDefault
   PWnd &= SELF.WndRef
+  SELF.EvtLogWrite('** WndPreview Reflection Enter **')
   IF ~ConfigGrp_DidGet THEN SELF.ConfigGetAll().    
   SETTARGET(SELF.WndRef) ;  DO LoadFieldQRtn ; SETTARGET()   !Must SETTARGET so reports work
   IF SELF.SelectedLast THEN FieldQ_LastFEQNo=SELF.SelectedLast.
@@ -657,6 +662,7 @@ ReOpenLOOP:Label:
      FldQ:FeqNo=ReOpenFEQNo ; GET(FieldQ,FldQ:FeqNo) ; SELECT(FldQ:FeqNo) !Select Control on Preview
      DISPLAY ; AtNoSetXY=0 ; GOTO ReOpenLOOP:Label:
   END
+  SELF.EvtLogWrite('** WndPreview Reflection Exit **')
   RETURN
 AcceptLoopRtn ROUTINE !--------------------
   ACCEPT
@@ -830,7 +836,8 @@ ShtFEQ LONG
 TricksBtnRtn ROUTINE 
   EXECUTE POPUPunder(?TricksBtn, |
      'Add Developer Tool Tips to Controls and LIST Columns' & |
-     '|Add Developer Tool Tips to Controls Only' & |
+     '|Add Developer Tool Tips to Controls Only' & | 
+     '|Event() Logging - ' & CHOOSE(~SELF.EvtLog.Started,'Start','Stop') & |
     '|-|Fix ####.## Numbers' & |
     '|Remove Blank from Pictures  @nB  @dB  @tB' & | !TODO ALl Pictures @d @t
     '|Make all LIST Columns Resizable' & |
@@ -839,7 +846,8 @@ TricksBtnRtn ROUTINE
     '|-|Edit Window Caption' & |
     '|-|Save Preview EXE so not lost on Close')
    DO Trick_DevTipsRtn
-   BEGIN ; DevTpNoLIST=1 ; DO Trick_DevTipsRtn ; DevTpNoLIST=0 ; END
+   BEGIN ; DevTpNoLIST=1 ; DO Trick_DevTipsRtn ; DevTpNoLIST=0 ; END 
+   IF ~SELF.EvtLog.Started THEN SELF.EvtLogStart(1) ELSE SELF.EvtLogStop().
    BEGIN ; SETTARGET(PWnd) ; SELF.AllFixNumbers() ; SETTARGET() ; END
    DO Trick_NoBlankPictureRtn
    DO Trick_ListColsResizeRtn
@@ -3571,7 +3579,7 @@ ColorEQT  STRING('000000Black 000080Maroon 008000Green 008080Olive 0080FFOrange 
 ClaControlTypeName PROCEDURE(LONG CtrlPropType)!,STRING  !Pass FEQ{PROP:Type} to get name e.g. Button
 TypeName    STRING(24)
     CODE        
-    TypeName=CHOOSE(BAND(CtrlPropType,0FFh), | 
+    TypeName=CHOOSE(BAND(CtrlPropType,0FFh)+1,'Window', | 
         'SString','String','Image','Region','Line','Box','Ellipse','Entry','Button','Prompt',|          !1-10
         'Option','Check','Group','List','Combo','Spin','Text','Custom','Menu','Item',|                  !11-20
         'Radio','MenuBar','Create23','Application','Window','Report','Header','Footer','Break','Form',| !21-30
@@ -4579,6 +4587,7 @@ DeclQ QueDeclareType
   CODE
   QueueDeclareGet(VlbQ,DeclQ)
   QueueViewListVLB(VlbQ, QName,DeclQ)
+!---------------  
 QueueViewListVLB PROCEDURE(QUEUE VlbQ, STRING QName, QueDeclareType DeclQ)
 VlbCls CLASS !From Mark Goldberg, but I hacked it to death
 FEQ    LONG
@@ -4592,13 +4601,25 @@ Expand PROCEDURE()
 VMapQ QUEUE,PRE(VMapQ) !Map for HasValue, no &Ref columns
 FieldX USHORT
       END
+R LONG
 X USHORT
 P USHORT
 Hdg STRING(80)
 Fmt ANY
-Window WINDOW('VLB'),AT(,,450,200),GRAY,SYSTEM,MAX,FONT('Segoe UI',9),RESIZE,ALRT(MouseRight)
-        LIST,AT(1,1),FULL,USE(?List:VLB),HVSCROLL,VCR,FORMAT('40L(1)|M~Col1~Q''NAME''')
-  END
+AddCnt  BYTE(10)
+PColumn USHORT
+Picture STRING(32)
+Window WINDOW('VLB'),AT(,,450,200),GRAY,SYSTEM,MAX,FONT('Segoe UI',9),RESIZE
+        BUTTON('&Menu'),AT(2,2,25,12),USE(?MenuBtn),SKIP
+        BUTTON('&Add'),AT(49,2,25,12),USE(?AddBtn),SKIP,TIP('Add Duplicates of Selected Row')
+        ENTRY(@n2),AT(78,3,14,10),USE(AddCnt),SKIP,TIP('Count to Add')
+        STRING('times'),AT(95,3),USE(?AddTms)
+        BUTTON('&Delete'),AT(118,2,,12),USE(?DelBtn),KEY(DeleteKey),SKIP,TIP('Delete Selected Row')
+        PROMPT('&Picture Column:'),AT(173,3,55),USE(?Pic:Pmt),DISABLE,RIGHT
+        COMBO(@s32),AT(233,3,59,10),USE(Picture),DISABLE,VSCROLL,TIP('Change Picture for Column'), |
+                DROP(16),FROM('@D1|@D2|@D3|@D17|@N11.2|@S255|@T1|@T3|@T4|@T8')
+        LIST,AT(1,17),FULL,USE(?List:VLB),HVSCROLL,COLUMN,VCR,FORMAT('40L(2)|M~Col1~Q''NAME'''),FLAT
+    END
   CODE
   LOOP X=1 TO RECORDS(DeclQ)
     GET(DeclQ,X) ; IF ~DeclQ:HasValue THEN CYCLE.
@@ -4606,23 +4627,42 @@ Window WINDOW('VLB'),AT(,,450,200),GRAY,SYSTEM,MAX,FONT('Segoe UI',9),RESIZE,ALR
     Hdg=DeclQ:Name
     IF INSTRING('::VIEWPOSITION',UPPER(DeclQ:Name),1) OR INSTRING('::POSITION',UPPER(DeclQ:Name),1) THEN CYCLE.
     P=INSTRING('::',Hdg,1)+1 ; IF P<2 THEN P=INSTRING(':',Hdg,1). ; IF P THEN Hdg=SUB(Hdg,P+1,99). !Cutoff Pre:
-    Fmt=Fmt&'40L(1)|M~' & DeclQ:FieldX & '. <13,10>'& CLIP(Hdg) &'~Q'' Field: <9>'& DeclQ:FieldX & |
+    Fmt=Fmt&'40L(2)|M~' & DeclQ:FieldX & '. <13,10>'& CLIP(Hdg) &'~Q'' Field: <9>'& DeclQ:FieldX & |
             '<13,10> Name: <9>'& CLIP(DeclQ:Name) &' <13,10> Type: <9>'& CLIP(DeclQ:DType) &' '''
   END
   OPEN(Window)
-  ?List:VLB{PROP:Format}=Fmt ; CLEAR(Fmt)
+  ?List:VLB{PROP:Format}=Fmt ; CLEAR(Fmt) ; LineHt(?List:VLB) ; LineHt(?Picture)
   0{PROP:Text}='Queue View: ' & QName &' - '& records(VlbQ) & ' Records - '& records(VMapQ) &' Columns  -  Right-Click for Options'
   VlbCls.Init(?List:VLB, Records(VMapQ))
   ACCEPT
-    IF EVENT()=EVENT:AlertKey AND KEYCODE()=MouseRight THEN
+    IF FIELD() THEN R=CHOICE(?List:VLB) ; GET(VlbQ,R).
+    IF EVENT()=EVENT:NewSelection AND FIELD()=?List:VLB AND KEYCODE()=MouseRight THEN
        SETKEYCODE(0)
-       X=?List:VLB{PROPLIST:MouseDownField}
-       EXECUTE POPUP('Contract Column Widths|Expand Column Widths|-|Copy Queue to Clipboard|-|Hide Column ' & X)
+       X=?List:VLB{PROPLIST:MouseDownField} ; GET(VMapQ,X)
+       CASE POPUP('Copy Cell to Clipboard|View Cell Text|-|Copy Row|View Row Text|-|Hide Column ' & X &'|Change @ Picture')
+       OF 1 ; SETCLIPBOARD(WHAT(VlbQ,VMapQ:FieldX))
+       OF 2 ; Fmt&=WHAT(VlbQ,VMapQ:FieldX) ; TextViewWindow(QName & ' Cell '& R &','& X ,Fmt,Fmt) ; CLEAR(Fmt)
+       OF 3 ; SetClipboard(VlbQ) 
+       OF 4 ; TextViewWindow(QName &' Row '&R,VlbQ,VlbQ)
+       OF 5 ; ?List:VLB{PROPLIST:width,X}=0 ; IF X=PColumn THEN DISABLE(?Pic:Pmt,?Picture) .
+       OF 6 ; Picture=?List:VLB{PROPLIST:Picture,X} ; ?Pic:Pmt{PROP:Text}='&Picture Col ' & X & ':'
+              ENABLE(?Pic:Pmt,?Picture) ; SELECT(?Picture) ; PColumn=X
+       END
+    END
+    CASE ACCEPTED()
+    OF ?DelBtn ; DELETE(VlbQ) 
+    OF ?AddBtn ; LOOP AddCnt TIMES ; ADD(VlbQ) ; END 
+    OF ?MenuBtn
+        EXECUTE POPUPunder(?MenuBtn,'Copy Queue to Clipboard|-|Contract Column Widths|Expand Column Widths' & |
+                        '|-|Copy VLB Format String')
+        SetClip2Queue(VlbQ) 
         VlbCls.Contrt()
         VlbCls.Expand()
-        SetClip2Queue(VlbQ)
-        ?List:VLB{PROPLIST:width,X}=0
-       END
+        SETCLIPBOARD(?List:VLB{PROP:Format})
+        END
+    OF ?Picture ; ?List:VLB{PROPLIST:Picture,PColumn}=Picture 
+                  ?List:VLB{CHOOSE(~INSTRING(lower(picture[1:2]),'@d@t@n@e'),PROPLIST:Left,PROPLIST:Right) ,PColumn}=1
+                  DISPLAY 
     END
   END
   RETURN
@@ -4660,6 +4700,28 @@ X LONG,AUTO
       IF DeclQ.HowMany>1 THEN DeclQ.HasValue=0.
       ADD(DeclQ)
     END 
+!----------------------
+CBWndPreviewClass.QueueReflection PROCEDURE(*QUEUE FromQ, STRING FromWho) !View Queue without Window for Roberto Artigas
+DeclareQ QUEUE(QueDeclareType),PRE(DecQ).
+Window WINDOW('Q'),AT(,,316,280),GRAY,SYSTEM,MAX,FONT('Segoe UI',9),RESIZE
+        BUTTON('&Copy Declare'),AT(2,2,,12),USE(?CopyBtn),SKIP,TIP('Copy Queue Declaration')
+        BUTTON('&View Queue Records'),AT(65,2,,12),USE(?ViewBtn),SKIP,TIP('View Queue Records')
+        LIST,AT(1,17),FULL,USE(?LIST:DeclareQ),VSCROLL,FONT('Consolas',10),FROM(DeclareQ), |
+                FORMAT('28C|FM~Fld<13,10>No.~@n3@135L(2)|FM~Field Name~@s64@?61L(2)|FM~Type~C(0)@s16' & |
+                '@24R(6)|FM~Type<13,10>No.~C(0)@n3@30L(6)|FM~Has<13,10>Value~C(0)@n3@33L(2)F~How<13>' & |
+                '<10>Many~@n4@')
+    END
+    CODE
+    OPEN(Window) ; DISPLAY ; QueueDeclareGet(FromQ,DeclareQ)
+    0{PROP:Text}=FromWho & ' - ' & Records(DeclareQ) & ' Fields - ' & Records(FromQ) & ' Records ' & |
+                               ' - &Queue=' & Hex8(INSTANCE(FromQ,Thread())) & ' - Address=' & Hex8(Address(FromQ))  
+    ACCEPT 
+        CASE ACCEPTED() 
+        OF ?CopyBtn ; SetClip2Queue(DeclareQ)
+        OF ?ViewBtn ; QueueViewListVLB(FromQ, FromWho, DeclareQ)   
+        END 
+    END
+    RETURN
 !----------------------
 CBWndPreviewClass.ListPROPs  PROCEDURE(LONG ListFEQ, LONG FeqTypeNo, STRING FeqTypeName, STRING FeqName)
 !TODO Tab for FROM if it is Text, as 1 string and split into lines 
@@ -4758,7 +4820,7 @@ Window WINDOW('Prop'),AT(,,450,300),GRAY,SYSTEM,MAX,FONT('Segoe UI',9),RESIZE
                 BUTTON('&View Decl(Q)'),AT(290,23,,12),USE(?DeclQViewBtn),SKIP,TIP('View From(Q) in List')
                 LIST,AT(0,36),FULL,USE(?LIST:FrmDecQ),VSCROLL,FONT('Consolas',10),FROM(FrmDecQ),FORMAT('28C|FM~Queue<13>' & |
                         '<10>Field~@n3@135L(2)|FM~Field Name~@s64@?61L(2)|FM~Type~C(0)@s16@34L(2)|FM~TypeNo~@n3@47L(2)|F' & |
-                        'M~HasValue~@n3@61L(2)|FM~HowMany~@n4@')
+                        'M~HasValue~@n3@61L(2)F~HowMany~@n4@')
             END
         END
     END
@@ -6069,6 +6131,85 @@ TRNControlsRtn ROUTINE
     END 
   END ; SETTARGET() 
   EXIT         
+!=============  Event Logging ============= 06/26/20
+CBWndPreviewClass.EvtLogStart PROCEDURE(BYTE Confirm=0)
+  CODE           !e.g. WndPrv_EventLog_20-06-26_070345.txt
+  SELF.EvtLog.LogName='WndPrv_EventLog_' & format(today(),@d09-) &'_'& format(clock(),@t05) &'.txt'
+  IF Confirm AND 2=Message('Log File: ' & SELF.EvtLog.LogName, 'Start Event Log?',,'&Log Events|&Cancel') THEN RETURN.
+  SELF.EvtLog.Started=1
+  C5LogSetName(SELF.EvtLog.LogName)
+  C5LogPrint('WndPreview Class Event Log ' & format(today(),@d3) &' @ '& format(clock(),@t6) &'<13,10>')
+  C5LogPrint('Window: ' & SELF.WndRef{PROP:Text} &' {5}EXE: ' & Command('0') &'<13,10>={80}<13,10>' )
+  SELF.EvtLogRegEvts() 
+CBWndPreviewClass.EvtLogStop PROCEDURE()
+CLog CSTRING(13)
+  CODE
+  IF ~SELF.EvtLog.Started THEN RETURN. ; SELF.EvtLog.Started=0
+  SELF.EvtLogRegEvts(1)
+  CLog='C' & INT(_CwVer_/100) & 'LOG.TXT' ; C5LogSetName(CLog) !C110LOG.TXT
+  RUN('Notepad ' & SELF.EvtLog.LogName)
+CBWndPreviewClass.EvtLogRegEvts PROCEDURE(BYTE UnReg=0)
+E USHORT
+  CODE
+  LOOP E=1 TO 400h
+    CASE E
+    OF 1 TO  1Fh OROF 101h TO 101h OROF 200h TO 250h  OROF 400h-1   !Skip 102h EVENT:Selecting too much
+      IF UnReg THEN UNREGISTER(E,ADDRESS(SELF.EvtLogTakeEvt),ADDRESS(SELF),SELF.WndRef) |
+               ELSE   REGISTER(E,ADDRESS(SELF.EvtLogTakeEvt),ADDRESS(SELF),SELF.WndRef).
+    END
+  END
+CBWndPreviewClass.EvtLogTakeEvt PROCEDURE()!,BYTE
+P USHORT,AUTO
+V LONG,AUTO
+F LONG,AUTO
+T USHORT,AUTO
+More CSTRING(200)
+  CODE
+  F=FIELD() ; T=F{PROP:Type}
+  CASE T
+  OF CREATE:List OROF CREATE:combo
+     More=' Choice:' & CHOICE(F) & CHOOSE(~KEYCODE(),'',' KeyCode:' & ClaKeyCodeExplain(KEYCODE(),1))
+     CASE BAND(KEYCODE(),0FFh) !Click mouse on LIST
+     OF MouseLeft TO MouseCenter2 OROF MouseLeftUp TO MouseCenterUp
+        LOOP P=0 to 8 ; V=F{PROPLIST:MouseDownRow+P} ; IF ~V THEN CYCLE.
+             More=More &' '& CHOOSE(P+1,'DnRow','MvRow','UpRow','DnFld','MvFld','UpFld','DnZone','MvZone','UpZone') &':'& V&' '
+        END
+     END
+  OF CREATE:Sheet OROF CREATE:Option ; More=' Choice:' & SELF.EvtLogField(F{PROP:ChoiceFEQ})
+  END
+  CASE EVENT()
+  OF EVENT:Accepted
+     IF CONTENTS(F) THEN More=More&' Contents:' & CONTENTS(F).
+  OF EVENT:AlertKey OROF EVENT:PreAlertKey
+     More=More&' KeyCode:' & ClaKeyCodeExplain(KEYCODE(),1) 
+  OF EVENT:Drop     ; More=More &' DragID:' & DragID() &' DropID:' & DropID()
+  OF EVENT:Rejected ; More=More &' Reject:' & RejectCode() &' ScrTxt:' & F{PROP:ScreenText}
+  END
+  SELF.EvtLogWrite(SELF.EvtLogEVENT() &' '& SELF.EvtLogField() &' '& UPPER(ClaControlTypeName(T)) & |
+                  CHOOSE(F=FOCUS() OR ~F OR ~FOCUS(),'',' Focus()=' & SELF.EvtLogField(FOCUS())) & More  )
+  RETURN 0
+CBWndPreviewClass.EvtLogWrite   PROCEDURE(STRING LogLine)
+Stamp STRING(12) !hh:mm:ss.ddS
+CDb CSTRING(SIZE(Stamp)+SIZE(LogLine)+2)
+Tme LONG,AUTO
+  CODE
+  IF ~SELF.EvtLog.Started THEN RETURN.
+  Tme=CLOCK() ; Stamp=FORMAT(Tme,@t04) & '.' & FORMAT( Tme % 100,@n02)
+  C5LogPrint(Stamp & LogLine & '<13,10>')
+  CDb='EventLog:' & CLIP(LogLine) & '<13,10>' ; OutputDebugString(CDb)
+  RETURN  
+CBWndPreviewClass.EvtLogEVENT PROCEDURE()
+M CSTRING(48)
+E LONG,AUTO 
+  CODE     
+  E=EVENT() ; IF ~E THEN RETURN ''.         
+  M=ClaEventNameRTL(E+0A000h) ; IF ~M THEN M=ClaEventNameRTL(E).
+  E=LEN(M) ; RETURN M & ALL(' ',20-E)
+CBWndPreviewClass.EvtLogField PROCEDURE(<LONG F>)
+c cstring(64)
+  CODE
+  IF OMITTED(F) THEN F=FIELD(). ; IF ~F then return ''. !'Window'.
+  c=ClaFieldNameRTL(F) ; RETURN CHOOSE(~c,'Feq#'&F,c &' (' & F & ')')  
 !==========================================
 ClaListColAlign  PROCEDURE(LONG ListFEQ, LONG ColX, BOOL IsGroup=0, BOOL IsHead=0)!,STRING
 AX          USHORT,AUTO

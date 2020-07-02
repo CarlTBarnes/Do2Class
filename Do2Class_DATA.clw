@@ -26,7 +26,7 @@ ProcessSourceQToCodeQ   PROCEDURE()  !Read SourceQ to find chnage and save into 
 TxaAddChangesQEmbeds    PROCEDURE()
 WriteTXAFile            PROCEDURE() !Write the changed TXA by read TXAQ and merge ChangesQ lines
 WriteDosLine            PROCEDURE(STRING Block, BYTE Add1310Count=1)  !Write line to DosFile to output txa
-WriteTagImplicit    PROCEDURE(LONG TXQ_LineNo,*STRING CodeLn, <*LONG Out_LenWO2>)
+WriteTagImplicit        PROCEDURE(LONG TXQ_LineNo,*STRING CodeLn, <*LONG Out_LenWO2>)
 
 ParseOrigCodeToSourceQ  PROCEDURE()  !Put TEXT OrigCode lines into SourceQ to have sommon code with TXA
 ProcessOrigCodeToCodeQ  PROCEDURE()     !Parse Origcode into CodeQ
@@ -43,7 +43,7 @@ ConfigLdSv1     PROCEDURE(BYTE LdSv,STRING EntName, *? EntValue)
 CodeQBackNext           PROCEDURE(SHORT BackNext, LONG FindStyleA=0) !Select next List CodeQ with a Change style
 StyleSetCodeQLists      PROCEDURE() 
 StyleSetCodeQList       PROCEDURE(LONG StyleNo, LONG TextClr, LONG BackClr, LONG SelTextClr=-1, LONG SelBackClr=-1, LONG FontStyle=-1) 
-RightClickLine          PROCEDURE(LONG LineNo)
+RightClickLine          PROCEDURE(LONG LineNo, <STRING CopyText>)
 !RightClickLine          PROCEDURE(LONG ListFEQ, QUEUE ListQ, *LONG 
 SelectSourceQLine       PROCEDURE(LONG SourceQ_LineNo),BOOL,PROC   !GET(SourceQ then SELECT(?List,Pointer 
 ChangesCodeCopy         PROCEDURE()

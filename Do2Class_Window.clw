@@ -112,9 +112,8 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                 SHEET,AT(5,54),FULL,USE(?Sheet_TXA),NOSHEET,BELOW
                     TAB('  TXA File  '),USE(?Tab_TxaFile)
                         LIST,AT(1,71),FULL,USE(?LIST:TxaQ),HVSCROLL,FONT('CONSOLAS',10),VCR,FROM(TxaQ), |
-                                FORMAT('30R(2)|FM~Line#~L(2)@n_5@20R(2)|M~Len~L(2)@n7@30R(2)|M~BegPo' & |
-                                's~L(2)@n7@#6#30R(2)|M~EndPos~L(2)@n7@30L(2)Y~TXA Line Text - Right ' & |
-                                'click for options~@s255@#3#'),ALRT(EnterKey)
+                                FORMAT('30R(2)|FM~Line#~L(2)@n_5@30L(2)Y~TXA Line Text - Right click' & |
+                                ' for options~@s255@#3#'),ALRT(EnterKey)
                     END
                     TAB('  TXA [EMBED]  '),USE(?Tab_Txa_EMBED)
                         LIST,AT(1,71),FULL,USE(?LIST:EmbedQ),VSCROLL,FONT('CONSOLAS',10),FROM(EmbedQ), |
@@ -171,7 +170,8 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                             'SS declaration to first Data embed')
                     CHECK('Sorted'),AT(267,33),USE(Cfg:WriteClassSorted),TIP('Sort Methods by Name, ' & |
                             'uncheck for by Line Order')
-                    CHECK('Tag Implicit !#$" '),AT(303,33),USE(Cfg:TagImplicitLines),TIP('Tag Implicit Lines !#$" in the save TXA to make it easy to find them and fix.')
+                    CHECK('Tag Implicit !#$" '),AT(303,33),USE(Cfg:TagImplicitLines),TIP('Tag Implic' & |
+                            'it Lines !#$" in the save TXA to make it easy to find them and fix.')
                     CHECK('Write No Changes'),AT(375,33),USE(WriteNoChanges),TIP('Test the TXA Write' & |
                             ' code works correcty.<13><10>Without changes a compare should show the ' & |
                             'files are identical.')
