@@ -1,7 +1,18 @@
 TODO: Code Filter Tab - e.g. LIST and ENTRY type "I# "and see all lines that contain "I#"
+===================== Release Checklist ====================
+[ ] Check Window that all FULL do not havce AT(,,Wid,Ht) --> LIST,AT(7,83,,305),FULL  except for XRefQ. Test Resize and check all tabs.
+[ ] Updated VersionDo2Class ?
 ===================== Do2Class History ===================== 
+07-07-20.1255   
+            Quick hack that if "Do2Class_STOP ROUTINE" exists then code below that is not processed
+                  which allows existing LocalProcedure embeds to be moved up into Routines embeds
+                  but they are not processed. Not pretty but worked in a 9000 line TXA with 19 routines
 
-07-01-20.1750    VersionDo2Class EQUATE('Do2Class Version 07-01-20.1750') 
+07-02-20.1215   VersionDo2Class EQUATE('Do2Class Version 07-02-20.1215')
+            Added Edit button next to Load TXA. Want to sometimes see the TXA text.
+            Added Explorer button next to Load TXA to open folder in explorer.
+
+07-01-20.1750   VersionDo2Class EQUATE('Do2Class Version 07-01-20.1750') 
             Added VersionDo2Class EQUATE() and put in Caption 
             Added [GROUP] section (code template) to TXA Parse class. 
             Right-click popup "Copy Text" on most lists.

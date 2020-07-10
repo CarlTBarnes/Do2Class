@@ -3,7 +3,7 @@
 ![ ] Write Option ONE Method per Embed to split big embeds with many routines 
 !
   PROGRAM
-VersionDo2Class EQUATE('Do2Class Version 07-01-20.1750')  
+VersionDo2Class EQUATE('Do2Class Version 07-07-20.1255')  
   INCLUDE('KEYCODES.CLW'),ONCE
   INCLUDE('CBTxa2Q.INC'),ONCE     
 
@@ -79,7 +79,9 @@ Do2Class        PROCEDURE()
     OF ?ProcessTxaBtn ; DDD.ProcessCodeQ2DoClass() ; DISPLAY ; SELECT(?TabCodeQ)
     OF ?TxaSaveBtn    ; DDD.WriteTXAFile() ; SETCLIPBOARD(TxaSaveFile)
     OF ?CopySaveFnBtn ; SETCLIPBOARD(TxaSaveFile)
-    OF ?EditSaveFnBtn    ; DDD.EditSaveFn()
+    OF ?ExploreBtn    ; RUN('Explorer.exe' & CHOOSE(~TxaLoadFile,'',' /select,"' & CLIP(TxaLoadFile) &'"')) !07/02/20
+    OF ?EditLoadFnBtn    ; DDD.EditFileName(TxaLoadFile) !07/02/20
+    OF ?EditSaveFnBtn    ; DDD.EditFileName(TxaSaveFile)
     OF ?CompareSaveFnBtn ; DDD.CompareSaveFn()
     OF ?ExploreSaveFnBtn ; IF TxaSaveFile THEN RUN('Explorer.exe /select,"' & CLIP(TxaSaveFile) &'"').
     OF ?PickTXAbtn    ; IF FILEDIALOG('Select a TXA file',TxaLoadFile, |
@@ -452,8 +454,12 @@ LocalProcLine1  LONG
             '||A workaround is to move the LP embeds up to the end of Routines, AND best to comment the '&|
             'code so it is not processed (if it has routines),'&|    
             '|then export to TXA again and name it APP_Procedure_NoLPE.TXA.' & |
-            '|After importing the Do2Class TXA uncomment these LP embeds (they will have been moved back to LPE).', |
-            'Local Procedure Embeds Exist', ICON:Asterisk)
+            '|After importing the Do2Class TXA uncomment these LP embeds (they will have been moved back to LPE).'& |
+            '||07/07/20 New Way - After last Routine Embed:' & |     !07/07/20
+            '|   1. Add new embed:  Do2Class_Stop ROUTINE ' & |
+            '|   2. Cut/Paste Local Procedure Embeds after Do2Class_Stop ROUTINE ' & |
+            '|   3. There should be nothing in Local Procedures Embed ' & |
+            '','Local Procedure Embeds Exist', ICON:Asterisk)
        !07/01/20 Having LocalProcedures prevents Do2Class from moving the Routine embeds converted to Classes from 
        !         being moved to Local Procedures. In a Legqacy Form/Browse Template having Class methods in 
        !         a Routines embed will likely cause compile errors because that will put generated routines 
@@ -634,7 +640,8 @@ Rtn2    LONG
 Spc1    LONG
 !Spc2    LONG 
 Routine7    EQUATE(7)   !The word Routine is 7 bytes
-SrcX  LONG
+SrcX  LONG 
+Do2Class_Stop_Found BOOL !07/07/20
     CODE 
     FixdCode='' 
     FREE(CodeQ)  ; CLEAR(CodeQ); FREE(ProblmQ) ; FREE(ImpliQ) ; FREE(XRefQ)
@@ -649,6 +656,7 @@ SrcX  LONG
          !05/24/20 IF SourceQ:EmbedType=CbTxaEmbedType:Routine THEN
          CASE SourceQ:EmbedType
          OF CbTxaEmbedType:Routine    ; CodeQ:Type  = Type:InRoutine
+            IF Do2Class_Stop_Found THEN CodeQ:Type  = Type:InMethod.    !07/07/20 
          OF CbTxaEmbedType:MethodCode ; CodeQ:Type  = Type:InMethod
          ELSE
             CodeQ:Type  = 0
@@ -703,7 +711,23 @@ SrcX  LONG
                      '|But not leading spaces from Spc1='& Spc1 &'||' & ALeft)
             CYCLE            !Could be ROUTINEprocedure() 
          END          
-         !TODO - could be better
+         !TODO - could be better 
+
+         !07/07/20 idea to insert DO2CLASS_STOP ROUTINE and then cut/paste the Local Procedures below that          
+         !         ??? can I automatically figure this out ? because I am in Routines but I find a Class
+         !             no because a Routine could define a local Class ?
+         IF ALeft[1 : Spc1]='DO2CLASS_STOP' THEN    !07/07/20
+            Message('Found DO2CLASS_STOP at SourceQ:LineNo=' & SourceQ:LineNo & '||Routine Processing will not be done to subsequent code.||'& ALeft)
+            Do2Class_Stop_Found=1             
+            CodeQ:Type = Type:Routine_Do2Class_Stop
+            CodeQ:RtnPos = Rtn1          
+            PUT(CodeQ)
+         END
+         IF Do2Class_Stop_Found THEN              !07/07/20
+            LastRtnLine=0 
+            CYCLE
+         END 
+         
          CodeQ:Type = Type:Routine
          CodeQ:RtnPos = Rtn1          
          PUT(CodeQ)
@@ -1577,17 +1601,17 @@ BS LONG
     CLOSE(LogFile)
 
 !------------
-DDD.EditSaveFn PROCEDURE()  
+DDD.EditFileName PROCEDURE(STRING FN)  
 EditorEXE STRING(260)
 Switches  PSTRING(64)
 RunLine CSTRING(1000)  
     CODE
-    IF ~EXISTS(TxaSaveFile) THEN 
-        Message('Please save the TXA file first') ; SELECT(?TxaSaveBtn) ; RETURN 
+    IF ~EXISTS(FN) THEN 
+        Message('File does not exist: ' & FN ) ; RETURN 
     END 
     EditorEXE=GETINI('Editor','EXE','Notepad.EXE','.\Editor.INI')
     Switches =CLIP(' '&GETINI('Editor','Switches','','.\Editor.INI'))
-    RunLine='"' & CLIP(EditorEXE) &'"' & Switches & ' "'&  CLIP(TxaSaveFile) &'"'
+    RunLine='"' & CLIP(EditorEXE) &'"' & Switches & ' "'&  CLIP(FN) &'"'
     RUN(RunLine)
     IF ERRORCODE() THEN Message('Run error ' & ErrorCode()&' '& ERROR() &'||Run('& RunLine ).
     RETURN

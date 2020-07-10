@@ -29,8 +29,8 @@ WriteDosLine            PROCEDURE(STRING Block, BYTE Add1310Count=1)  !Write lin
 WriteTagImplicit        PROCEDURE(LONG TXQ_LineNo,*STRING CodeLn, <*LONG Out_LenWO2>)
 
 ParseOrigCodeToSourceQ  PROCEDURE()  !Put TEXT OrigCode lines into SourceQ to have sommon code with TXA
-ProcessOrigCodeToCodeQ  PROCEDURE()     !Parse Origcode into CodeQ
-ProcessCodeQ2DoClass    PROCEDURE()     !Make changes
+ProcessOrigCodeToCodeQ  PROCEDURE()  !Parse Origcode into CodeQ
+ProcessCodeQ2DoClass    PROCEDURE()  !Make changes. Scan CodeQ for ROUTINE then make a DOO. Procedure. Scan for DO and change to DOO.
 MakeCodeOnlyCoLine      PROCEDURE(*STRING InCodeLine, *CSTRING OutCoLine)  !CodeOnly = UPPER w/o 'String Literals' !Comments
 BuildFixdCode           PROCEDURE()
 MakeClassQPretty        PROCEDURE()   !Align the procedure names to look nice
@@ -56,7 +56,7 @@ Font10ptChange          PROCEDURE()
 XRefCopy                PROCEDURE() !Copy XRef Qs to Clipboard
 LastProcedureInClass    PROCEDURE()  !I just add to the end before this 
 LogFileAppend           PROCEDURE()  !Add to the LogFile
-EditSaveFn              PROCEDURE()  !Open Save TXA in an Editor (Notepad)
+EditFileName            PROCEDURE(STRING FileName2Edit)  !Open Load or Save TXA in an Editor (Notepad)
 CompareSaveFn           PROCEDURE()  !Compare Before and After TXAs using WinMerge
         END
         
@@ -83,6 +83,7 @@ Type:DATAline   EQUATE(21)   !Routine's "DATA" line
 Type:CODEline   EQUATE(22)   !Routine's "CODE" line 
 Type:InRoutine  EQUATE(3)    !Source is in a Routine want to check it for Implicits and RETURNs
 Type:InMethod   EQUATE(4)    !05/24/20 KSS Source is in a MethodCode want to check for DO 
+Type:Routine_Do2Class_Stop  EQUATE(90)  !07/07/20 
 
 StyleA:Routine  EQUATE(1)    !          For CodeQ:StyleA
 StyleA:Change   EQUATE(2)
