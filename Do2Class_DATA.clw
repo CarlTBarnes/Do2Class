@@ -27,6 +27,8 @@ TxaAddChangesQEmbeds    PROCEDURE()
 WriteTXAFile            PROCEDURE() !Write the changed TXA by read TXAQ and merge ChangesQ lines
 WriteDosLine            PROCEDURE(STRING Block, BYTE Add1310Count=1)  !Write line to DosFile to output txa
 WriteTagImplicit        PROCEDURE(LONG TXQ_LineNo,*STRING CodeLn, <*LONG Out_LenWO2>)
+IsImplicit1PoundOnly    PROCEDURE(STRING CodeUpperClip),BOOL !Call UPPER(CLIP(code)) Implicits only X# ?
+IsImplicitInCodeLine    PROCEDURE(STRING CodeUpperClip),BOOL !Call UPPER(CLIP())     Any Implcit
 
 ParseOrigCodeToSourceQ  PROCEDURE()  !Put TEXT OrigCode lines into SourceQ to have sommon code with TXA
 ProcessOrigCodeToCodeQ  PROCEDURE()  !Parse Origcode into CodeQ
@@ -49,7 +51,7 @@ SelectSourceQLine       PROCEDURE(LONG SourceQ_LineNo),BOOL,PROC   !GET(SourceQ 
 ChangesCodeCopy         PROCEDURE()
 ImplicitCodeCopy        PROCEDURE()
 TabCountQ               PROCEDURE() !Put (#) Count on all Tabs
-TabCountQ               PROCEDURE(LONG TabFEQ, QUEUE Q, LONG Adjust=0) !Put (#) Count on Tab
+TabCountQ               PROCEDURE(LONG TabFEQ, QUEUE Q, LONG Adjust=0, <STRING IconIfCount>) !Put (#) Count on Tab
 ResizeWindow            PROCEDURE(BYTE IsOpen=0)
 TreeExpandContract      PROCEDURE(QUEUE TreeQ, *LONG TreeLevel, BYTE Contract=0) 
 Font10ptChange          PROCEDURE() 

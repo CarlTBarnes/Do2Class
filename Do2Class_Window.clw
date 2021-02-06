@@ -17,7 +17,7 @@ OmitDATAline        BYTE(1)     !Cfg:OmitDATAline
 SELFinClass         BYTE        !Cfg:SELFinClass
 WriteClass2Data     BYTE(1)     !Cfg:WriteClass2Data
 WriteClassSorted    BYTE(1)     !Cfg:WriteClassSorted
-TagImplicitLines    BYTE(1)     !Cfg:TagImplicitLines  on Write mark Implicitis with !#$"
+TagImplicitLines    BYTE(1)     !Cfg:TagImplicitLines Save tags Implicitis with !#$" !02/06/21 State3=2=Not A-Z#
 !         BYTE        !Cfg:
 !         BYTE        !Cfg:
 
@@ -34,14 +34,14 @@ Font10pt          BYTE(10)
 Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,ICON('Do2CIcon.ICO'), |
             FONT('Segoe UI',9),DROPID('~FILE'),RESIZE
         OPTION,AT(481,2,66,12),USE(IsTXAinput),SKIP
-            RADIO('TXA'),AT(485,3),USE(?IsTXAinput:Radio1),TIP('Load and convert TXA file.<13,10>Mus' & |
+            RADIO('TXA'),AT(489,3),USE(?IsTXAinput:Radio1),TIP('Load and convert TXA file.<13,10>Mus' & |
                     't be ONE Procedure'),VALUE('1')
-            RADIO('Source'),AT(513,3),USE(?IsTXAinput:Radio2),TIP('Paste in Source Code with ROUTINE' & |
+            RADIO('Source'),AT(515,3),USE(?IsTXAinput:Radio2),TIP('Paste in Source Code with ROUTINE' & |
                     ' and convert'),VALUE('0')
         END
         SPIN(@n2),AT(551,3,23,9),USE(Font10pt),SKIP,TIP('Font Size'),RANGE(8,14)
         SHEET,AT(1,2),FULL,USE(?Sheet1)
-            TAB(' Steps  '),USE(?Tab_Instrux)
+            TAB('Steps'),USE(?Tab_Instrux)
                 CHECK('. Step'),AT(54,37),USE(?Step:X)
                 CHECK(' Backup APP Folder. TXA Verify by Export + Import + Compare CLWs'),AT(54,37), |
                         USE(?Step:BackupAPP)
@@ -74,7 +74,7 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                         ' APP code. '),AT(54,227),USE(?Step:Problems2)
                 CHECK(' The XRef tab may help understand the code. '),AT(54,242),USE(?Step:Problems2:2)
             END
-            TAB(' &TXA '),USE(?TabTxaLoad)
+            TAB(' Load &TXA '),USE(?TabTxaLoad)
                 PROMPT('TXA &File:'),AT(7,20,,14),USE(?TxaLoadFile:Pmt)
                 COMBO(@s255),AT(43,20,339,12),USE(TxaLoadFile),VSCROLL,DROP(15),FROM(MruQ), |
                         FORMAT('290L(2)@s255@Z(1)20L(2)@s1@Z(1)')
@@ -115,9 +115,9 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                 PANEL,AT(3,53,,2),FULL,USE(?PanelH),BEVEL(0,0,0600H)
                 SHEET,AT(6,54),FULL,USE(?Sheet_TXA),NOSHEET,BELOW
                     TAB('  TXA File  '),USE(?Tab_TxaFile)
-                        LIST,AT(2,72),FULL,USE(?LIST:TxaQ),HVSCROLL,FONT('CONSOLAS',10),VCR, |
-                                FROM(TxaQ),FORMAT('30R(2)|FM~Line#~L(2)@n_5@30L(2)Y~TXA Line Text - ' & |
-                                'Right click for options~@s255@#3#'),ALRT(EnterKey)
+                        LIST,AT(2,72),FULL,USE(?LIST:TxaQ),HVSCROLL,FONT('CONSOLAS',10),VCR,FROM(TxaQ), |
+                                FORMAT('30R(2)|FM~Line#~L(2)@n_5@30L(2)Y~TXA Line Text - Right click' & |
+                                ' for options~@s255@#3#'),ALRT(EnterKey)
                     END
                     TAB('  TXA [EMBED]  '),USE(?Tab_Txa_EMBED)
                         LIST,AT(1,71),FULL,USE(?LIST:EmbedQ),VSCROLL,FONT('CONSOLAS',10),FROM(EmbedQ), |
@@ -137,9 +137,9 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                                 'XA Line, Right click more ...~@s255@#3#'),ALRT(EnterKey)
                     END
                     TAB(' [Section] Only '),USE(?Tab_SxaQ)
-                        LIST,AT(1,71),FULL,USE(?LIST:SxaQ),HVSCROLL,FONT('CONSOLAS',10),VCR, |
-                                FROM(SxaQ),FORMAT('30R(2)|FM~Line#~L(2)@n_5@72L(2)|FM~[Secton]~@s255' & |
-                                '@#3#30L(2)~Next Line~@s255@#5#'),ALRT(EnterKey)
+                        LIST,AT(1,71),FULL,USE(?LIST:SxaQ),HVSCROLL,FONT('CONSOLAS',10),VCR,FROM(SxaQ), |
+                                FORMAT('30R(2)|FM~Line#~L(2)@n_5@72L(2)|FM~[Secton]~@s255@#3#30L(2)~' & |
+                                'Next Line~@s255@#5#'),ALRT(EnterKey)
                     END
                 END
             END
@@ -160,7 +160,7 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                         'red Class Name, I like DOO')
                 TEXT,AT(7,36),FULL,USE(OrigCode),HVSCROLL,FONT('Consolas',10)
             END
-            TAB(' &CLASS Code (Save TXA)'),USE(?TabClassCode),TIP('Final Result of this program')
+            TAB(' Save TXA '),USE(?TabClassCode),TIP('Final Result of this program')
                 BUTTON('Copy Class'),AT(7,19,41,13),USE(?CopyBtn),SKIP,TIP('Copy CLASS Code to Clipboard')
                 BUTTON('Close'),AT(53,19,27,13),USE(?Close2Btn),SKIP,STD(STD:Close)
                 GROUP,AT(90,18,453,25),USE(?SaveTxaGroup),DISABLE
@@ -175,7 +175,8 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                     CHECK('Sorted'),AT(267,33),USE(Cfg:WriteClassSorted),TIP('Sort Methods by Name, ' & |
                             'uncheck for by Line Order')
                     CHECK('Tag Implicit !#$" '),AT(303,33),USE(Cfg:TagImplicitLines),TIP('Tag Implic' & |
-                            'it Lines !#$" in the save TXA to make it easy to find them and fix.')
+                            'it Lines !#$" in the save TXA to make it easy to find them and fix.<13>' & |
+                            '<10,13,10>State 3 Gray box omits tagging 1 letter A-Z#'),STATE3('2')
                     CHECK('Write No Changes'),AT(375,33),USE(WriteNoChanges),TIP('Test the TXA Write' & |
                             ' code works correcty.<13><10>Without changes a compare should show the ' & |
                             'files are identical.')
@@ -206,12 +207,12 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                         'changes by selecting the line and pressing DELETE~@s255@'),ALRT(DeleteKey), |
                          ALRT(EnterKey)
             END
-            TAB(' Cl&ass Q'),USE(?TabClassQ),TIP('List of Classes (Routines) found in code')
+            TAB(' Cl&ass'),USE(?TabClassQ),TIP('List of Classes (Routines) found in code')
                 LIST,AT(7,23),FULL,USE(?LIST:ClassQ),VSCROLL,FONT('Consolas',10),FROM(ClassQ), |
                         FORMAT('100L(2)|FM~Name~23R(2)|FM~Line~L(2)@n5b@204L(2)|FM~Code~@s255@'), |
                         ALRT(EnterKey)
             END
-            TAB(' C&ode Q'),USE(?TabCodeQ),TIP('Code Side-by-Side View. Changes are highlighted.')
+            TAB(' C&ode '),USE(?TabCodeQ),TIP('Code Side-by-Side View. Changes are highlighted.')
                 STRING('Type: 10=Routine  20=RoutineDC 21=DATA 22=CODE  3=In Routine  -1=Comment'), |
                         AT(7,19,247),USE(?StringCodeQ)
                 BUTTON('&Back'),AT(263,18,29,12),USE(?CodeBackRtn),SKIP,TIP('Jump to Previous Change')
@@ -250,13 +251,11 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                         USE(?StringImpliQ3)
                 STRING('Implicits CANNOT be used to pass data between Methods like Routines ... E#=?' & |
                         'Entry ; DO CheckRtn '),AT(49,47),USE(?StringImpliQ:2)
-                !STRING('Implicits are BAD! They are LOCAL in Scope in CLASS so do NOT Persist. Implicits CANNOT be used to pass data between Methods.... DIFFERENT than Routines. '),AT(49,19+40),USE(?StringImpliQ9)
                 BUTTON('Copy'),AT(7,59,,12),USE(?CopyImplicitsBtn),SKIP,TIP('Copy the Implicits list' & |
                         ' below')
-                CHECK('In save TXA Tag Implicit lines with !#$" to make them easy to jump to with Search'), |
-                        AT(49,60),USE(Cfg:TagImplicitLines,, ?Cfg:TagImplicitLines:ImpTab),SKIP, |
-                        TIP('Tag Implicit Lines !#$" on write TXA<13,10>to make it easy to find them' & |
-                        ' in the Embeditor by search for !#$.')
+                CHECK('Add !#$" Tag to the Implicit lines to make them easy to jump to with Search  ' & |
+                        '(Gray Omits A-Z#)'),AT(49,60),USE(Cfg:TagImplicitLines,, |
+                         ?Cfg:TagImplicitLines:ImpTab),SKIP,STATE3('2')
                 LIST,AT(7,73),FULL,USE(?LIST:ImpliQ),VSCROLL,FONT('Consolas',10),FROM(ImpliQ), |
                         FORMAT('23R(2)|FM~Line~L(2)@n5b@23R(2)|FM~Type~L(2)@n-3b@/23R(2)|FM~Rtn Pos ' & |
                         'of Label ~L(2)@n4b@/250L(2)|MY~Code Line Modified ~S(200)@s255@204L(2)~Code' & |
@@ -271,13 +270,16 @@ Window WINDOW('DO to CLASS for TXA '),AT(,,577,388),CENTER,GRAY,IMM,SYSTEM,MAX,I
                 STRING('DO ProcedureReturn in a ROUTINE was also for the Procedure(). Compiler will ' & |
                         'error: ROUTINE that can RETURN from procedure cannot be called here. Same f' & |
                         'ix as Return. (tip)'),AT(27,40),USE(?ProbReturnDPR)
+                STRING('Add a "DO2CLASS_STOP ROUTINE" above CLASS Code moved to Routine Embeds t' & |
+                        'o stop flagging as "? Return was in Routine ?" error lines.  (tip)'),AT(27,50), |
+                        USE(?ProbReturnDO2CLASS_STOP)
                 STRING('OMITTED() in a ROUTINE is for the Procedure(<<Parm>). In a Class it will be ' & |
-                        'for Method(<<Parm>). Suggest to never use old syntax Omitted(#).'),AT(7,50), |
+                        'for Method(<<Parm>). Suggest to never use old syntax Omitted(#).'),AT(7,63), |
                         USE(?ProbOmitted)
                 STRING('Code changes MUST be made ... An ABC limitation is a Routine is the only way' & |
                         ' to get Omitted() for Procedure so change back to a Routine.  (read tooltip)'), |
-                        AT(27,60),USE(?ProbOmittedFix)
-                LIST,AT(7,83),FULL,USE(?LIST:ProblmQ),VSCROLL,FONT('Consolas',10),FROM(ProblmQ), |
+                        AT(27,73),USE(?ProbOmittedFix)
+                LIST,AT(7,96),FULL,USE(?LIST:ProblmQ),VSCROLL,FONT('Consolas',10),FROM(ProblmQ), |
                         FORMAT('23R(2)|FM~Line~L(2)@n5b@23R(2)|FM~Type~L(2)@n-3b@/23R(2)|FM~Rtn Pos ' & |
                         'of Label ~L(2)@n4b@/250L(2)|MY~Code Line Modified ~S(200)@s255@204L(2)~Code' & |
                         ' Line Original ~S(200)@s255@'),ALRT(EnterKey)

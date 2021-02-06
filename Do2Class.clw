@@ -3,7 +3,7 @@
 ![ ] Write Option ONE Method per Embed to split big embeds with many routines 
 !
   PROGRAM
-VersionDo2Class EQUATE('Do2Class Version 07-07-20.1255')  
+VersionDo2Class EQUATE('Do2Class Version 02-06-21.1528')  
   INCLUDE('KEYCODES.CLW'),ONCE
   INCLUDE('CBTxa2Q.INC'),ONCE     
 
@@ -106,6 +106,7 @@ Do2Class        PROCEDURE()
                      DDD.ProcessCodeQ2DoClass()
                      SELECT(?TabCodeQ) ; DISPLAY
                      DDD.BuildFixdCode()
+                     DDD.TabCountQ()
                      SELECT(?TabClassCode) ; DISPLAY
     OF ?ClearBtn ; CLEAR(OrigCode) ; DISPLAY ; SELECT(?OrigCode)
     OF ?CopyOrigBtn ; SETCLIPBOARD(OrigCode) ; SELECT(?OrigCode)
@@ -226,20 +227,21 @@ DDD.PrepareWindow PROCEDURE()
   DDD.LineHt(?List:EmbedQ)  
   DDD.LineHt(?TxaLoadFile)  
   !?TxaLoadFile{PROP:FontName}='Consolas'
-  DDD.StyleSetCodeQLists() 
+  DDD.StyleSetCodeQLists()
+  ?ProbReturnDO2CLASS_STOP{PROP:FontColor}=COLOR:HotLight 
   DDD.ConfigLoadSave(1)
   MruClass.Init()
 
     OMIT('**END**', OmitWndPrv)   !Not required in 11.13505, but below does show Queue Name in WndPreview
-  WndPrvCls.Init(1) 
-  WndPrvCls.InitList(?LIST:TxaQ        ,TxaQ    ,'TxaQ   ')     !WndPreview secret button hover upper left corner and pops up
+  WndPrvCls.Init(1)    !WndPreview secret button hover upper left corner and pops up
+  WndPrvCls.InitList(?LIST:TxaQ        ,TxaQ    ,'TxaQ   ')     !.InitList() not required C11 >= 13505. It only adds FromQ
   WndPrvCls.InitList(?LIST:EmbedQ      ,EmbedQ  ,'EmbedQ ')     !In WndPreview main window right click on a LIST
   WndPrvCls.InitList(?LIST:SourceQ     ,SourceQ ,'SourceQ')     !On Popup select "LIST FORMAT() and PropList: Properties
   WndPrvCls.InitList(?LIST:SxaQ        ,SxaQ    ,'SxaQ   ')     !On PROPLIST window click the From(Q) button
   WndPrvCls.InitList(?LIST:ChangeQ     ,ChangeQ ,'ChangeQ')     !On From(Q) Tab can "View From(Q)
-  WndPrvCls.InitList(?LIST:ChangeQ:SbS ,ChangeQ ,'ChangeQ') 
-  WndPrvCls.InitList(?LIST:ClassQ      ,ClassQ  ,'ClassQ ') 
-  WndPrvCls.InitList(?LIST:CodeQ       ,CodeQ   ,'CodeQ  ') 
+  WndPrvCls.InitList(?LIST:ChangeQ:SbS ,ChangeQ ,'ChangeQ')
+  WndPrvCls.InitList(?LIST:ClassQ      ,ClassQ  ,'ClassQ ')
+  WndPrvCls.InitList(?LIST:CodeQ       ,CodeQ   ,'CodeQ  ')
   WndPrvCls.InitList(?LIST:CodeOU      ,CodeQ   ,'CodeQ  ') 
   WndPrvCls.InitList(?LIST:ProblmQ     ,ProblmQ ,'ProblmQ') 
   WndPrvCls.InitList(?LIST:ImpliQ      ,ImpliQ  ,'ImpliQ ') 
@@ -262,8 +264,8 @@ DDD.PrepareWindow PROCEDURE()
                            '<13,10>When changed to DOO.Method() this will NOT work correctly.' & |
                            '<13,10>If this is ABC this must still be a ROUTINE or change the stupid Window template to allow an Embed after CODE.' & |
                            '<13,10>If this is Legacy simply move the OMITTED() code outside the Method and maybe assign to a variable.' &|
-                           '<13,10>Do NOT use old syntax OMITTED(#). Change the (#) to the (VarName).' &|
-                           ''
+                           '<13,10>Do NOT use old syntax OMITTED(#). Change the (#) to the (VarName).'
+  ?Cfg:TagImplicitLines:ImpTab{PROP:Tip}= Cfg:TagImplicitLines{PROP:Tip}
   RETURN
 DDD.LineHt PROCEDURE(LONG FEQ, SHORT HtBump=1)
   CODE
@@ -475,12 +477,31 @@ DDD.WriteTagImplicit    PROCEDURE(LONG TXQ_LineNo,*STRING CodeLn, <*LONG Out_Len
     CODE
     ImpliQ:LineNo=TXQ_LineNo 
     GET(ImpliQ,ImpliQ:LineNo)
-    IF ~ERRORCODE() AND ImpQ:StyleA<>StyleA:Routine THEN
-        CodeLn=CLIP(CodeLn) &'  !#$"'
-        IF ~OMITTED(Out_LenWO2) THEN Out_LenWO2=LenFastClip(CodeLn).
+    IF ~ERRORCODE() AND ImpQ:StyleA<>StyleA:Routine THEN 
+        IF Cfg:TagImplicitLines<>2                        |     !2=Omit A-Z#
+        OR ~DDD.IsImplicit1PoundOnly(UPPER(CLIP(CodeLn))) THEN  !Is Not only A-Z# so output
+           CodeLn=CLIP(CodeLn) &'  !#$"'
+           IF ~OMITTED(Out_LenWO2) THEN Out_LenWO2=LenFastClip(CodeLn).
+        END
     END
-    RETURN
-!------------------------- 
+    RETURN 
+!-------------------------
+DDD.IsImplicit1PoundOnly PROCEDURE(STRING CodeUpr)!,BOOL  !Call UPPER(CLIP())
+Idx LONG,AUTO
+Changes LONG      !If didn't change any A-Z# skip Match check on Return
+    CODE
+    LOOP 20 TIMES
+        Idx=STRPOS(CodeUpr,'[\{{\+\-\*<<>= ([,][_A-Z]#')  !Find <32>X# or (X# or [X# ,X# =X# etc
+        IF ~Idx THEN BREAK.
+        Changes += 1
+        CodeUpr[Idx : Idx+3]='~~~'  !Change ' I#' to '~~~' to prevent find again
+    END     
+    RETURN CHOOSE(Changes>0 AND ~DDD.IsImplicitInCodeLine(CodeUpr))  
+!-------------------------
+DDD.IsImplicitInCodeLine PROCEDURE(STRING CodeUpr)!,BOOL  !Call UPPER(CLIP())
+    CODE
+    RETURN MATCH(CodeUpr,'[^@][_A-Z][_A-Z0-9]*[#"$]', Match:Regular)
+!-------------------------
 DDD.WriteTXAFile PROCEDURE()  !Write the changed TXA by read TXAQ and merge ChangesQ lines
 TXQ  &CbTxaLineQueueType  ! &= TxaCls.LinesQ so can TXQ:
 B   LONG
@@ -1115,7 +1136,8 @@ AddNextRtn2Impli  BYTE   !doing in reverse
         ELSE
            DELETE(ChangeQ)
         END 
-        IF MATCH(UPPER(CodeQ:CoLine),'[_A-Z][_A-Z0-9]*[#"$]', Match:Regular) THEN 
+        !02/06/21 IF MATCH(UPPER(CodeQ:CoLine),'[^@][_A-Z][_A-Z0-9]*[#"$]', Match:Regular) THEN  !02/05/21 add [^N] to avoid Picture like @N$9
+        IF DDD.IsImplicitInCodeLine(UPPER(UPPER(CodeQ:CoLine))) THEN !02/06/21 !Call UPPER(CLIP())
            ImpliQ=CodeQ
            ImpQ:CoLine=CLIP(ChgQ:ALine)
            ADD(ImpliQ, ImpQ:LineNo)
@@ -1470,12 +1492,12 @@ L  BYTE
 DDD.TabCountQ PROCEDURE()
     CODE
     DDD.TabCountQ(?TabChangeQ, ChangeQ)
-    DDD.TabCountQ(?TabProblmQ, ProblmQ) 
-    DDD.TabCountQ(?TabImpliQ, ImpliQ) 
-    DDD.TabCountQ(?TabOmitQ,  OmitQ) 
-    DDD.TabCountQ(?TabClassQ, ClassQ, -2) 
+    DDD.TabCountQ(?TabProblmQ, ProblmQ,  ,'~Tab_Red.gif') 
+    DDD.TabCountQ(?TabImpliQ,  ImpliQ,   ,'~Tab_Orange.gif') 
+    DDD.TabCountQ(?TabOmitQ,   OmitQ,    ,'~Tab_Blue.gif')
+    DDD.TabCountQ(?TabClassQ,  ClassQ, -2) 
     RETURN
-DDD.TabCountQ PROCEDURE(LONG TabFEQ, QUEUE Q, LONG Adjust=0) !Put (#) Count on Tab
+DDD.TabCountQ PROCEDURE(LONG TabFEQ, QUEUE Q, LONG Adjust=0, <STRING IconIfCount>) !Put (#) Count on Tab
 TabNm   PSTRING(32),AUTO
 R       LONG,AUTO
     CODE
@@ -1485,7 +1507,12 @@ R       LONG,AUTO
         TabFEQ{'UPROP_TabNm'}=TabNm
     END 
     R=RECORDS(Q)+Adjust
-    TabFEQ{PROP:Text}=TabNm & CHOOSE(R<1,'',' (' & R & ') ')
+    TabFEQ{PROP:Text}=TabNm & CHOOSE(R<1,'',' (' & R & ') ') 
+    IF ~OMITTED(IconIfCount) THEN 
+        TabFEQ{PROP:Icon}=CHOOSE(R<1,'',IconIfCount)
+        !Message(TabFEQ{PROP:Text} &'|'& R,'TabCountQ',IconIfCount)
+    END 
+    
     RETURN 
 !------------
 DDD.ResizeWindow PROCEDURE(BYTE IsOpen=0) 

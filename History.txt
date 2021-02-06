@@ -3,6 +3,15 @@ TODO: Code Filter Tab - e.g. LIST and ENTRY type "I# "and see all lines that con
 [ ] Check Window that all FULL do not havce AT(,,Wid,Ht) --> LIST,AT(7,83,,305),FULL  except for XRefQ. Test Resize and check all tabs.
 [ ] Updated VersionDo2Class ?
 ===================== Do2Class History ===================== 
+02-05-21.1500   On Problems tab remind can insert "Do2Class_STOP ROUTINE" to prevent "? Return was in Routine ?"
+                Put Icons on Tabs if they need attention like Problems
+                Fix Implicit search finding Pictures like @N$9 which N$ looked like a Real   
+                Tag Implicit !@# new State 3 Gray box skips A-Z#. They are used a lot for LOOP X#. 
+                        I added this feature for about 30 lines. I probably should have reviewed those lines.
+                        I used a STATE3 Checkbox to Omit A-Z#, this is not the right use for that control :(
+                
+07-11-20.1527   Add Tab Counts when processing source. 
+                Tip: Use the Source processing to find all Implicit Variables
 07-07-20.1255   
             Quick hack that if "Do2Class_STOP ROUTINE" exists then code below that is not processed
                   which allows existing LocalProcedure embeds to be moved up into Routines embeds
