@@ -1492,9 +1492,9 @@ L  BYTE
 DDD.TabCountQ PROCEDURE()
     CODE
     DDD.TabCountQ(?TabChangeQ, ChangeQ)
-    DDD.TabCountQ(?TabProblmQ, ProblmQ,  ,'~Tab_Red.gif') 
-    DDD.TabCountQ(?TabImpliQ,  ImpliQ,   ,'~Tab_Orange.gif') 
-    DDD.TabCountQ(?TabOmitQ,   OmitQ,    ,'~Tab_Blue.gif')
+    DDD.TabCountQ(?TabProblmQ, ProblmQ,  ,'~Tab_Red.gif')       !Icons from http://www.famfamfam.com/
+    DDD.TabCountQ(?TabImpliQ,  ImpliQ,   ,'~Tab_Orange.gif')    !Very nice small icons and free !
+    DDD.TabCountQ(?TabOmitQ,   OmitQ,    ,'~Tab_Yellow.gif')
     DDD.TabCountQ(?TabClassQ,  ClassQ, -2) 
     RETURN
 DDD.TabCountQ PROCEDURE(LONG TabFEQ, QUEUE Q, LONG Adjust=0, <STRING IconIfCount>) !Put (#) Count on Tab

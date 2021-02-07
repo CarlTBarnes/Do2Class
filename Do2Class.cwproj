@@ -38,6 +38,7 @@
     <Library Include="Tab_Blue.gif" />
     <Library Include="Tab_Orange.gif" />
     <Library Include="Tab_Red.gif" />
+    <Library Include="Tab_Yellow.gif" />
   </ItemGroup>
   <Import Project="$(ClarionBinPath)\SoftVelocity.Build.Clarion.targets" />
 </Project>
