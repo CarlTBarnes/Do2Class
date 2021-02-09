@@ -35,7 +35,6 @@
   </ItemGroup>
   <ItemGroup>
     <FileDriver Include="DOS" />
-    <Library Include="Tab_Blue.gif" />
     <Library Include="Tab_Orange.gif" />
     <Library Include="Tab_Red.gif" />
     <Library Include="Tab_Yellow.gif" />
